@@ -9,21 +9,21 @@ namespace MSSQLWrapper.Query {
     /// <summary>
     /// Represents a full condition clause such as ((a = b and b = c) or c = d ...) and so on
     /// </summary>
-    public class Condition<T> where T : BaseQuery<T> {
+    public class Condition {
         private static int count = 0;
         public ConditionType Type { get; }
         public Operator Operator { get; set; }
-        public Column<T> Column { get; set; }
+        public Column Column { get; set; }
         /// <summary>
         /// Name of param to be inserted in SQLCommand
         /// </summary>
         public string Name { get; private set; }
         public object Value { get; set; }
 
-        public List<Tuple<Conditional, Condition<T>>> ListConditions { get; private set; }
+        public List<Tuple<Conditional, Condition>> ListConditions { get; private set; }
 
         public Condition() {
-            ListConditions = new List<Tuple<Conditional, Condition<T>>>();
+            ListConditions = new List<Tuple<Conditional, Condition>>();
             Operator = Operator.Equals;
             Name = $"@param{count++}";
         }
@@ -34,12 +34,12 @@ namespace MSSQLWrapper.Query {
             Value = value;
         }
 
-        public Condition(ConditionType type, Column<T> column, object value = null)
+        public Condition(ConditionType type, Column column, object value = null)
             : this(type, value) {
             Column = column;
         }
 
-        public Condition<T> Append(Conditional cond, Condition<T> otherCondition) {
+        public Condition Append(Conditional cond, Condition otherCondition) {
             ListConditions.Add(Tuple.Create(cond, otherCondition));
 
             return this;
@@ -50,10 +50,10 @@ namespace MSSQLWrapper.Query {
 
             sb.Append("(");
 
-            sb.AppendFormat("{0} {1}", Column.ConditionName, Operator.GetStringValue());
+            sb.AppendFormat("{0} {1}", Column.FullName, Operator.GetStringValue());
 
             if (Operator != Operator.IsNotNull && Operator != Operator.IsNull) {
-                sb.Append(" " + (Value is Column<T> ? ((Column<T>)Value).ConditionName : Name));
+                sb.Append(" " + (Value is Column ? ((Column)Value).FullName : Name));
             }
 
             foreach (var tuple in ListConditions) {
@@ -69,8 +69,8 @@ namespace MSSQLWrapper.Query {
         /// Gets a flattened list of all conditions involved in this instance
         /// </summary>
         /// <returns></returns>
-        public List<Condition<T>> GetAllConditions() {
-            var list = new List<Condition<T>>();
+        public List<Condition> GetAllConditions() {
+            var list = new List<Condition>();
 
             list.Add(this);
 

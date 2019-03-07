@@ -8,77 +8,33 @@ using MSSQLWrapper.Enums;
 using System.Data;
 
 namespace MSSQLWrapper.Query {
-    public class SelectQuery : BaseQuery<SelectQuery> {
-        public List<Column<SelectQuery>> SelectColumns { get; set; }
-        public List<Column<SelectQuery>> GroupByColumns { get; set; }
-        public List<Condition<SelectQuery>> HavingColumns { get; set; }
-        public List<Tuple<Column<SelectQuery>, Order>> OrderByColumns { get; set; }
-        public int Top { get; set; }
-        public bool Distinct { get; set; }
+    public class SelectQuery : BaseQuery {
+        public List<Column> SelectColumns { get; set; }
+        public List<Column> GroupByColumns { get; set; }
+        public List<Condition> HavingColumns { get; set; }
+        public List<Tuple<Column, Order>> OrderByColumns { get; set; }
+        public int TopN { get; set; }
+        public bool SelectDistinct { get; set; }
         public string JoinQuery {
             get {
                 return (SelectColumns.Count == 0 && ListJoin.Count == 0) ? FromTable : ToRawQuery();
             }
         }
 
-        public SelectQuery(SqlConnection connection = null, int timeout = DefaultTimeout)
-            : base(connection, timeout) {
+        public SelectQuery(string fromTable = null, SqlConnection connection = null, int timeout = DefaultTimeout)
+            : base(fromTable, connection, timeout) {
 
-            SelectColumns = new List<Column<SelectQuery>>();
+            SelectColumns = new List<Column>();
 
-            GroupByColumns = new List<Column<SelectQuery>>();
+            GroupByColumns = new List<Column>();
 
-            HavingColumns = new List<Condition<SelectQuery>>();
+            HavingColumns = new List<Condition>();
 
-            OrderByColumns = new List<Tuple<Column<SelectQuery>, Order>>();
+            OrderByColumns = new List<Tuple<Column, Order>>();
 
-            Top = -1;
+            TopN = -1;
 
-            Distinct = false;
-        }
-
-        public SelectQuery Select(params string[] columns) {
-            SelectColumns.AddRange(columns.Select(r => GetNewColumn(r)));
-
-            return this;
-        }
-
-        public SelectQuery Select(params Column<SelectQuery>[] columns) {
-            SelectColumns.AddRange(columns);
-
-            return this;
-        }
-
-        public SelectQuery GroupBy(params string[] columns) {
-            GroupByColumns.AddRange(columns.Select(r => GetNewColumn(r)));
-
-            return this;
-        }
-
-        public SelectQuery GroupBy(params Column<SelectQuery>[] columns) {
-            GroupByColumns.AddRange(columns);
-
-            return this;
-        }
-
-        public SelectQuery OrderBy(params object[] columns) {
-            ArgumentException e = new ArgumentException("Invalid arguments: params must be in pairs of (Columns/string, Order)");
-
-            for (int i = 0; i < columns.Length; i += 2) {
-                if (i + 1 >= columns.Length || !(columns[i + 1] is Order)) {
-                    throw e;
-                }
-
-                if (columns[i] is string) {
-                    OrderByColumns.Add(Tuple.Create(GetNewColumn((string)columns[i]), (Order)columns[i + 1]));
-                } else if (columns[i] is Column<SelectQuery>) {
-                    OrderByColumns.Add(Tuple.Create((Column<SelectQuery>)columns[i], (Order)columns[i + 1]));
-                } else {
-                    throw e;
-                }
-            }
-
-            return this;
+            SelectDistinct = false;
         }
 
         public override string ToRawQuery() {
@@ -86,20 +42,20 @@ namespace MSSQLWrapper.Query {
 
             sb.AppendLine("SELECT");
 
-            if (Distinct) {
+            if (SelectDistinct) {
                 sb.Append(" DISTINCT");
             }
 
-            if (Top > 0) {
-                sb.AppendFormat(" TOP {0}", Top)
+            if (TopN > 0) {
+                sb.AppendFormat(" TOP {0}", TopN)
                   .AppendLine();
             }
 
             if (SelectColumns.Count > 0) {
                 for (int i = 0; i < SelectColumns.Count; i++) {
-                    Column<SelectQuery> col = SelectColumns[i];
+                    Column col = SelectColumns[i];
 
-                    sb.Append(col.AliasedName);
+                    sb.Append(" " + col.AliasedName);
                     
                     if (i < SelectColumns.Count - 1)
                         sb.Append(",");
@@ -111,7 +67,7 @@ namespace MSSQLWrapper.Query {
             }
 
             sb.AppendLine("FROM")
-              .AppendFormat(" {0}", FromTableOrQuery())
+              .AppendFormat("{0}{1}", FromTableOrQuery(), FromQuery == null ? "" : $" AS {FromQuery.Item2}")
               .AppendLine();
 
             sb.Append(JoinString);
@@ -125,7 +81,7 @@ namespace MSSQLWrapper.Query {
             if (GroupByColumns.Count > 0) {
                 sb.AppendLine("GROUP BY");
 
-                sb.AppendLine(String.Join(",", GroupByColumns.Select(r => " " + r.ConditionName)));
+                sb.AppendLine(String.Join(",", GroupByColumns.Select(r => " " + r.FullName)));
             }
 
             if (OrderByColumns.Count > 0) {
@@ -137,15 +93,12 @@ namespace MSSQLWrapper.Query {
             return sb.ToString();
         }
 
-        public string ToQuotedQuery(bool withAlias) {
+        public string ToQuotedQuery() {
             string rawQuery = ToRawQuery(), 
-                   vanillaQuery = FromTable == null ? "" : new SelectQuery().From(FromTable).ToRawQuery();
-            
+                   vanillaQuery = FromTable == null ? "" : new SelectQuery(fromTable: FromTable).ToRawQuery();
+
             /// If the query only contains a table name, return table name directly
-            return String.Format("({0}{1}{0}){2}",
-                Environment.NewLine,
-                rawQuery == vanillaQuery ? FromTable : rawQuery,
-                withAlias ? "" : $" AS {Alias}");
+            return String.Format("({0}{1}{0})", Environment.NewLine, rawQuery == vanillaQuery ? FromTable : rawQuery);
         }
 
         public DataTable ExecuteQuery() {
