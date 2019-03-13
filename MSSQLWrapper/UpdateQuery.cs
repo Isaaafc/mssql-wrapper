@@ -19,7 +19,7 @@ namespace MSSQLWrapper.Query {
                 }
 
                 /// Validate
-                var c = ListSet.Select(r => r.Item1.FullName)
+                var c = ListSet.Select(r => String.IsNullOrEmpty(r.Item1.Query.Alias) ? r.Item1.Query.FromTableOrAlias() : r.Item1.Query.Alias)
                                .Distinct()
                                .Count();
 

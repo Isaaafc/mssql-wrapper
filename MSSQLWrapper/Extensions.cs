@@ -19,5 +19,15 @@ namespace MSSQLWrapper {
             // Return the first if there was a match.  
             return attribs.Length > 0 ? attribs[0].StringValue : null;
         }
+
+        public static bool HasArgs(this Enum value) {
+            Type type = value.GetType();
+
+            FieldInfo fieldInfo = type.GetField(value.ToString());
+
+            EnumArgsAttribute[] attribs = fieldInfo.GetCustomAttributes(typeof(EnumArgsAttribute), false) as EnumArgsAttribute[];
+
+            return attribs.Length > 0 ? attribs[0].HasArgs : false;
+        }
     }
 }

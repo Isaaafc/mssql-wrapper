@@ -40,6 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CreateQuery.cs" />
+    <Compile Include="CreateQueryBuilder.cs" />
+    <Compile Include="EnumArgsAttribute.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="EnumStringAttribute.cs" />
     <Compile Include="Extensions.cs" />
@@ -50,6 +53,7 @@
     <Compile Include="QueryBuilder.cs" />
     <Compile Include="SelectQuery.cs" />
     <Compile Include="SelectQueryBuilder.cs" />
+    <Compile Include="TableConstraint.cs" />
     <Compile Include="UpdateQuery.cs" />
     <Compile Include="UpdateQueryBuilder.cs" />
   </ItemGroup>

@@ -7,18 +7,9 @@ using System.Threading.Tasks;
 namespace MSSQLWrapper.Enums {
     public class EnumStringAttribute : Attribute {
         public EnumStringAttribute(string stringValue) {
-            this.stringValue = stringValue;
+            StringValue = stringValue;
         }
 
-        private string stringValue;
-
-        public string StringValue {
-            get {
-                return stringValue;
-            }
-            set {
-                stringValue = value;
-            }
-        }
+        public string StringValue { get; set; }
     }
 }
