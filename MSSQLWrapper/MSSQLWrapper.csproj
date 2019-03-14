@@ -46,6 +46,8 @@
     <Compile Include="Enums.cs" />
     <Compile Include="EnumStringAttribute.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="InsertQuery.cs" />
+    <Compile Include="InsertQueryBuilder.cs" />
     <Compile Include="Query.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Column.cs" />

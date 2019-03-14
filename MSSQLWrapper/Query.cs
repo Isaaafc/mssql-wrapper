@@ -19,9 +19,9 @@ namespace MSSQLWrapper.Query {
 
         protected string rawQuery;
 
-        private Tuple<SelectQuery, string> fromQuery;
+        protected Tuple<SelectQuery, string> fromQuery;
 
-        private string fromTable;
+        protected string fromTable;
 
         public string RawQuery {
             get {
@@ -29,7 +29,7 @@ namespace MSSQLWrapper.Query {
             }
         }
 
-        public string FromTable {
+        public virtual string FromTable {
             get {
                 return fromTable;
             }
@@ -40,7 +40,7 @@ namespace MSSQLWrapper.Query {
             }
         }
 
-        public Tuple<SelectQuery, string> FromQuery {
+        public virtual Tuple<SelectQuery, string> FromQuery {
             get {
                 return fromQuery;
             }
