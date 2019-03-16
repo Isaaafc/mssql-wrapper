@@ -15,9 +15,20 @@ namespace MSSQLWrapper.Query {
         public List<Tuple<Column, Order>> OrderByColumns { get; set; }
         public int TopN { get; set; }
         public bool SelectDistinct { get; set; }
-        public string JoinQuery {
+
+        public bool IsTableOnly {
             get {
-                return (SelectColumns.Count == 0 && ListJoin.Count == 0) ? FromTable : ToRawQuery();
+                return (
+                    SelectColumns.Count == 0
+                    && GroupByColumns.Count == 0
+                    && HavingColumns.Count == 0
+                    && OrderByColumns.Count == 0
+                    && TopN == -1
+                    && SelectDistinct == false
+                    && ListJoin.Count == 0
+                    && WhereCondition == null
+                    && (FromQuery == null || FromQuery.Item1.IsTableOnly)
+                );
             }
         }
 
@@ -93,12 +104,9 @@ namespace MSSQLWrapper.Query {
             return sb.ToString();
         }
 
-        public string ToQuotedQuery() {
-            string rawQuery = ToRawQuery(), 
-                   vanillaQuery = FromTable == null ? "" : new SelectQuery(fromTable: FromTable).ToRawQuery();
-
+        public string ToTableOrQuery() {
             /// If the query only contains a table name, return table name directly
-            return String.Format("({0}{1}{0})", Environment.NewLine, rawQuery == vanillaQuery ? FromTable : rawQuery);
+            return String.Format("{0}{1}{0}", Environment.NewLine, IsTableOnly ? (FromTable == null ? FromQuery.Item1.FromTable : FromTable) : $"({ToRawQuery()})");
         }
 
         public DataTable ExecuteQuery() {

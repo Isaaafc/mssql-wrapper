@@ -65,7 +65,7 @@ namespace MSSQLWrapper.Query {
                     var tuple = ListJoin[i];
 
                     sb.AppendLine("JOIN")
-                      .AppendFormat("{0}{1}", tuple.Item1.ToQuotedQuery(), String.IsNullOrEmpty(tuple.Item2) ? "" : $" AS {tuple.Item2}")
+                      .AppendFormat("{0}{1}", tuple.Item1.ToTableOrQuery(), String.IsNullOrEmpty(tuple.Item2) ? "" : $" AS {tuple.Item2}")
                       .AppendLine();
 
                     tuple.Item1.Alias = tuple.Item2;
@@ -90,7 +90,7 @@ namespace MSSQLWrapper.Query {
             FromTable = fromTable;
         }
 
-        public Column GetNewColumn(string name, string alias = null) {
+        public Column NewColumn(string name, string alias = null) {
             return new Column(query: this, name: name, alias: alias);
         }
 
@@ -99,7 +99,10 @@ namespace MSSQLWrapper.Query {
 
             var listConditions = new List<Condition>();
 
-            listConditions.AddRange(WhereCondition.GetAllConditions());
+            if (WhereCondition != null) {
+                listConditions.AddRange(WhereCondition.GetAllConditions());
+            }
+
             listConditions.AddRange(ListJoin.Select(r => r.Item3.GetAllConditions()).SelectMany(r => r));
 
             foreach (Condition condition in listConditions) {
@@ -114,7 +117,7 @@ namespace MSSQLWrapper.Query {
         }
 
         public string FromTableOrQuery() {
-            return FromTable == null ? FromQuery.Item1.ToQuotedQuery() : FromTable;
+            return FromTable == null ? FromQuery.Item1.ToTableOrQuery() : FromTable;
         }
 
         public string FromTableOrAlias() {

@@ -58,12 +58,12 @@ namespace MSSQLWrapper.Query {
             Condition condition = new Condition(ConditionType.Join);
 
             if (columns.Length > 0) {
-                condition.Column = otherQuery.GetNewColumn(columns[0]);
+                condition.Column = otherQuery.NewColumn(columns[0]);
                 condition.Operator = op;
-                condition.Value = Query.GetNewColumn(columns[0]);
+                condition.Value = Query.NewColumn(columns[0]);
 
                 for (int i = 1; i < columns.Length; i++) {
-                    condition.Append(Conditional.And, new Condition(ConditionType.Join, otherQuery.GetNewColumn(columns[i]), Query.GetNewColumn(columns[i])));
+                    condition.Append(Conditional.And, new Condition(ConditionType.Join, otherQuery.NewColumn(columns[i]), Operator.Equals, Query.NewColumn(columns[i])));
                 }
 
                 Join(otherQuery, alias, condition);
@@ -100,6 +100,10 @@ namespace MSSQLWrapper.Query {
             Query.WhereCondition = condition;
 
             return builder;
+        }
+
+        public Column NewColumn(string name, string alias = null) {
+            return Query.NewColumn(name);
         }
     }
 }

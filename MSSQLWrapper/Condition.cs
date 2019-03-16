@@ -7,7 +7,7 @@ using MSSQLWrapper.Enums;
 
 namespace MSSQLWrapper.Query {
     /// <summary>
-    /// Represents a full condition clause such as ((a = b and b = c) or c = d ...) and so on
+    /// Represents a full condition clause such as ((a = b and b = c) or c = d ...)
     /// </summary>
     public class Condition {
         private static int count = 0;
@@ -30,13 +30,14 @@ namespace MSSQLWrapper.Query {
 
         public Condition(ConditionType type, object value = null)
             : this() {
-            Type = type;
             Value = value;
+            Type = type;
         }
 
-        public Condition(ConditionType type, Column column, object value = null)
+        public Condition(ConditionType type, Column column, Operator op, object value = null) 
             : this(type, value) {
             Column = column;
+            Operator = op;
         }
 
         public Condition Append(Conditional cond, Condition otherCondition) {

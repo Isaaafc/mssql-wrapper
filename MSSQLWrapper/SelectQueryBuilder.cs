@@ -15,7 +15,7 @@ namespace MSSQLWrapper.Query {
 
 
         public SelectQueryBuilder Select(params string[] columns) {
-            Query.SelectColumns.AddRange(columns.Select(r => Query.GetNewColumn(r)));
+            Query.SelectColumns.AddRange(columns.Select(r => Query.NewColumn(r)));
 
             return builder;
         }
@@ -39,7 +39,7 @@ namespace MSSQLWrapper.Query {
         }
 
         public SelectQueryBuilder GroupBy(params string[] columns) {
-            Query.GroupByColumns.AddRange(columns.Select(r => Query.GetNewColumn(r)));
+            Query.GroupByColumns.AddRange(columns.Select(r => Query.NewColumn(r)));
 
             return builder;
         }
@@ -59,7 +59,7 @@ namespace MSSQLWrapper.Query {
                 }
 
                 if (columns[i] is string) {
-                    Query.OrderByColumns.Add(Tuple.Create(Query.GetNewColumn((string)columns[i]), (Order)columns[i + 1]));
+                    Query.OrderByColumns.Add(Tuple.Create(Query.NewColumn((string)columns[i]), (Order)columns[i + 1]));
                 } else if (columns[i] is Column) {
                     Query.OrderByColumns.Add(Tuple.Create((Column)columns[i], (Order)columns[i + 1]));
                 } else {

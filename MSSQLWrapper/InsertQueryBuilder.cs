@@ -31,7 +31,7 @@ namespace MSSQLWrapper.Query {
             BaseQuery query = new BaseQuery(table);
 
             Query.Table = table;
-            Query.InsertColumns = new List<Column>(columns.Select(r => query.GetNewColumn(r)));
+            Query.InsertColumns = new List<Column>(columns.Select(r => query.NewColumn(r)));
 
             return this;
         }
