@@ -46,6 +46,26 @@ namespace MSSQLWrapper.Query {
             return this;
         }
 
+        public Condition And(Column column, Operator op, object value = null) {
+            Condition otherCondition = new Condition(Type, column, op, value);
+
+            return Append(Conditional.And, otherCondition);
+        }
+
+        public Condition And(Condition otherCondition) {
+            return Append(Conditional.And, otherCondition);
+        }
+
+        public Condition Or(Column column, Operator op, object value = null) {
+            Condition otherCondition = new Condition(Type, column, op, value);
+
+            return Append(Conditional.Or, otherCondition);
+        }
+
+        public Condition Or(Condition otherCondition) {
+            return Append(Conditional.Or, otherCondition);
+        }
+
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
 
