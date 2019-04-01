@@ -117,10 +117,16 @@ namespace MSSQLWrapper.Query {
         }
 
         public string FromTableOrQuery() {
+            if (FromTable == null && FromQuery == null)
+                return null;
+
             return FromTable == null ? FromQuery.Item1.ToTableOrQuery() : FromTable;
         }
 
         public string FromTableOrAlias() {
+            if (FromTable == null && FromQuery == null)
+                return null;
+
             return FromTable == null ? FromQuery.Item2 : FromTable;
         }
 

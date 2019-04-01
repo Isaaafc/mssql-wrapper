@@ -44,18 +44,13 @@ namespace MSSQLWrapper.Query {
         /// <param name="targetColumns">Columns with Key: target query column name, Value: condition</param>
         /// <returns></returns>
         public TQueryBuilder Join(SelectQuery otherQuery, string alias, Condition condition) {
-            if (condition.Type == ConditionType.Join) {
-
-                Query.ListJoin.Add(Tuple.Create(otherQuery, alias, condition));
-            } else {
-                throw new ArgumentException("ConditionType is invalid. (Condition.Type must be equal to ConditionType.Join)");
-            }
+            Query.ListJoin.Add(Tuple.Create(otherQuery, alias, condition));
 
             return builder;
         }
 
         public TQueryBuilder Join(SelectQuery otherQuery, string alias, Operator op, params string[] columns) {
-            Condition condition = new Condition(ConditionType.Join);
+            Condition condition = new Condition();
 
             if (columns.Length > 0) {
                 condition.Column = otherQuery.NewColumn(columns[0]);
@@ -63,7 +58,7 @@ namespace MSSQLWrapper.Query {
                 condition.Value = Query.NewColumn(columns[0]);
 
                 for (int i = 1; i < columns.Length; i++) {
-                    condition.Append(Conditional.And, new Condition(ConditionType.Join, otherQuery.NewColumn(columns[i]), Operator.Equals, Query.NewColumn(columns[i])));
+                    condition.Append(Conditional.And, new Condition(otherQuery.NewColumn(columns[i]), Operator.Equals, Query.NewColumn(columns[i])));
                 }
 
                 Join(otherQuery, alias, condition);
@@ -81,23 +76,13 @@ namespace MSSQLWrapper.Query {
         }
 
         public TQueryBuilder Where(Condition condition) {
-            if (condition.Type == ConditionType.Where) {
-                Query.WhereCondition = condition;
-            } else {
-                throw new ArgumentException("ConditionType is invalid. (Condition.Type must be equal to ConditionType.Where)");
-            }
-
+            Query.WhereCondition = condition;
+            
             return builder;
         }
 
         public TQueryBuilder Where(Column column, Operator op, object value) {
-            Condition condition = new Condition(ConditionType.Where);
-
-            condition.Column = column;
-            condition.Value = value;
-            condition.Operator = op;
-
-            Query.WhereCondition = condition;
+            Query.WhereCondition = new Condition(column, op, value);
 
             return builder;
         }

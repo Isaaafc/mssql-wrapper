@@ -58,13 +58,15 @@ namespace MSSQLWrapper.Query {
 
             sb.AppendLine("SET");
 
-            sb.Append(UpdateColumns.ToString());
+            sb.AppendLine(UpdateColumns.ToString());
 
-            sb.AppendLine("FROM")
-              .AppendFormat("{0}{1}", FromTableOrQuery(), FromQuery == null ? "" : $" AS {FromQuery.Item2}")
-              .AppendLine();
+            if (FromTableOrQuery() != null) {
+                sb.AppendLine("FROM")
+                  .AppendFormat("{0}{1}", FromTableOrQuery(), FromQuery == null ? "" : $" AS {FromQuery.Item2}");
+            }
 
-            sb.Append(JoinString);
+            sb.AppendLine()
+              .Append(JoinString);
 
             if (WhereCondition != null) {
                 sb.AppendLine("WHERE");

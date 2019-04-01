@@ -43,14 +43,6 @@ namespace MSSQLWrapper.Enums {
         Top1000
     }
 
-    public enum ConditionType {
-        Where,
-        Join,
-        LeftJoin,
-        RightJoin,
-        OuterJoin
-    }
-
     public enum Conditional {
         [EnumString("AND")]
         And,

@@ -11,7 +11,6 @@ namespace MSSQLWrapper.Query {
     /// </summary>
     public class Condition {
         private static int count = 0;
-        public ConditionType Type { get; }
         public Operator Operator { get; set; }
         public Column Column { get; set; }
         /// <summary>
@@ -28,16 +27,11 @@ namespace MSSQLWrapper.Query {
             Name = $"@param{count++}";
         }
 
-        public Condition(ConditionType type, object value = null)
+        public Condition(Column column, Operator op, object value = null)
             : this() {
-            Value = value;
-            Type = type;
-        }
-
-        public Condition(ConditionType type, Column column, Operator op, object value = null) 
-            : this(type, value) {
             Column = column;
             Operator = op;
+            Value = value;
         }
 
         public Condition Append(Conditional cond, Condition otherCondition) {
@@ -47,7 +41,7 @@ namespace MSSQLWrapper.Query {
         }
 
         public Condition And(Column column, Operator op, object value = null) {
-            Condition otherCondition = new Condition(Type, column, op, value);
+            Condition otherCondition = new Condition(column, op, value);
 
             return Append(Conditional.And, otherCondition);
         }
@@ -57,7 +51,7 @@ namespace MSSQLWrapper.Query {
         }
 
         public Condition Or(Column column, Operator op, object value = null) {
-            Condition otherCondition = new Condition(Type, column, op, value);
+            Condition otherCondition = new Condition(column, op, value);
 
             return Append(Conditional.Or, otherCondition);
         }
