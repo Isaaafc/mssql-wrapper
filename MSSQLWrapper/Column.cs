@@ -13,7 +13,7 @@ namespace MSSQLWrapper.Query {
         public string FullName {
             get {
                 if (Query == null || Query.FromTableOrAlias() == null) {
-                    return $"[{Name}]";
+                    return Name;
                 } else if (String.IsNullOrEmpty(Query.Alias)) {
                     return $"{Query.FromTableOrAlias()}.[{Name}]";
                 } else {

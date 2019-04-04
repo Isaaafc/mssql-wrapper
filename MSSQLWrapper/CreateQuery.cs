@@ -21,6 +21,27 @@ namespace MSSQLWrapper.Query {
             ListColumns = new List<Tuple<string, DataType, int>>();
         }
 
+        public new CreateQuery Clone() {
+            CreateQuery query = new CreateQuery(connection: Connection, timeout: Timeout);
+
+            /// From BaseQuery
+            if (FromTable != null)
+                query.FromTable = FromTable;
+            else
+                query.FromQuery = FromQuery;
+
+            query.WhereCondition = WhereCondition;
+            query.ListJoin = ListJoin;
+            query.Alias = Alias;
+
+            /// From CreateQuery
+            query.Table = Table;
+            query.ListConstraints = ListConstraints;
+            query.ListColumns = ListColumns;
+
+            return query;
+        }
+
         public string GetConstraintString() {
             StringBuilder sb = new StringBuilder();
 
@@ -49,6 +70,26 @@ namespace MSSQLWrapper.Query {
             }
 
             return sb.ToString();
+        }
+
+        public int ExecuteQuery() {
+            using (SqlCommand cmd = GetSqlCommand()) {
+                cmd.CommandText = ToRawQuery();
+
+                AddCommandParams(cmd);
+
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
+        public int ExecuteQuery(SqlTransaction trans) {
+            using (SqlCommand cmd = GetSqlCommand(trans)) {
+                cmd.CommandText = ToRawQuery();
+
+                AddCommandParams(cmd);
+
+                return cmd.ExecuteNonQuery();
+            }
         }
     }
 }

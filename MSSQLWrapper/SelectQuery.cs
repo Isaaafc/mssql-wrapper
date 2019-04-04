@@ -48,6 +48,30 @@ namespace MSSQLWrapper.Query {
             SelectDistinct = false;
         }
 
+        public new SelectQuery Clone() {
+            SelectQuery query = new SelectQuery(connection:Connection, timeout: Timeout);
+
+            /// From BaseQuery
+            if (FromTable != null)
+                query.FromTable = FromTable;
+            else
+                query.FromQuery = FromQuery;
+
+            query.WhereCondition = WhereCondition;
+            query.ListJoin = ListJoin;
+            query.Alias = Alias;
+
+            /// From SelectQuery
+            query.SelectColumns = SelectColumns;
+            query.GroupByColumns = GroupByColumns;
+            query.HavingColumns = HavingColumns;
+            query.OrderByColumns = OrderByColumns;
+            query.TopN = TopN;
+            query.SelectDistinct = SelectDistinct;
+
+            return query;
+        }
+
         public override string ToRawQuery() {
             StringBuilder sb = new StringBuilder();
 

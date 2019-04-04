@@ -97,5 +97,25 @@ namespace MSSQLWrapper.Query {
 
             return list;
         }
+
+        /// <summary>
+        /// Gets all columns involved in this instance excluding null values
+        /// </summary>
+        /// <returns></returns>
+        public List<Column> GetAllColumns() {
+            var list = new List<Column>();
+
+            list.Add(Column);
+            list.Add(Value as Column);
+
+            list.AddRange(
+                ListConditions
+                .Select(r => r.Item2.GetAllColumns())
+                .SelectMany(r => r)
+            );
+
+            return list.Where(r => r != null)
+                       .ToList();
+        }
     }
 }

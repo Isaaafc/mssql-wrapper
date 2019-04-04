@@ -51,11 +51,11 @@ namespace MSSQLWrapper.Query {
             }
         }
 
-        public string Alias { get; private set; }
+        public string Alias { get; internal set; }
         public int Timeout { get; set; }
         public SqlConnection Connection { get; set; }
         public Condition WhereCondition { get; set; }
-        public List<Tuple<SelectQuery, string, Condition>> ListJoin { get; set; }
+        public List<Tuple<SelectQuery, Condition>> ListJoin { get; set; }
 
         public string JoinString {
             get {
@@ -65,15 +65,11 @@ namespace MSSQLWrapper.Query {
                     var tuple = ListJoin[i];
 
                     sb.AppendLine("JOIN")
-                      .AppendFormat("{0}{1}", tuple.Item1.ToTableOrQuery(), String.IsNullOrEmpty(tuple.Item2) ? "" : $" AS {tuple.Item2}")
+                      .AppendFormat("{0}{1}", tuple.Item1.ToTableOrQuery(), String.IsNullOrEmpty(tuple.Item1.Alias) ? "" : $" AS {tuple.Item1.Alias}")
                       .AppendLine();
 
-                    tuple.Item1.Alias = tuple.Item2;
-
-                    sb.AppendFormat(" ON {0}", tuple.Item3.ToString())
+                    sb.AppendFormat(" ON {0}", tuple.Item2.ToString())
                       .AppendLine();
-
-                    tuple.Item1.Alias = null;
                 }
 
                 return sb.ToString();
@@ -85,9 +81,19 @@ namespace MSSQLWrapper.Query {
 
             Timeout = timeout;
 
-            ListJoin = new List<Tuple<SelectQuery, string, Condition>>();
+            ListJoin = new List<Tuple<SelectQuery, Condition>>();
 
             FromTable = fromTable;
+        }
+
+        protected BaseQuery Clone() {
+            BaseQuery query = new BaseQuery(FromTable, Connection, Timeout);
+
+            query.FromQuery = FromQuery;
+            query.WhereCondition = WhereCondition;
+            query.ListJoin = ListJoin;
+
+            return query;
         }
 
         public Column NewColumn(string name, string alias = null) {
@@ -103,7 +109,7 @@ namespace MSSQLWrapper.Query {
                 listConditions.AddRange(WhereCondition.GetAllConditions());
             }
 
-            listConditions.AddRange(ListJoin.Select(r => r.Item3.GetAllConditions()).SelectMany(r => r));
+            listConditions.AddRange(ListJoin.Select(r => r.Item2.GetAllConditions()).SelectMany(r => r));
 
             foreach (Condition condition in listConditions) {
                 if (!String.IsNullOrEmpty(condition.Name) && condition.Value != null && !(condition.Value is Column)) {
@@ -132,6 +138,14 @@ namespace MSSQLWrapper.Query {
 
         protected SqlCommand GetSqlCommand() {
             SqlCommand cmd = new SqlCommand("", Connection);
+
+            cmd.CommandTimeout = Timeout;
+
+            return cmd;
+        }
+
+        protected SqlCommand GetSqlCommand(SqlTransaction trans) {
+            SqlCommand cmd = new SqlCommand("", Connection, trans);
 
             cmd.CommandTimeout = Timeout;
 

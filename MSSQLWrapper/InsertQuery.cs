@@ -26,6 +26,28 @@ namespace MSSQLWrapper.Query {
             InsertValues = new List<object>();
         }
 
+        public new InsertQuery Clone() {
+            InsertQuery query = new InsertQuery(connection: Connection, timeout: Timeout);
+
+            /// From BaseQuery
+            if (FromTable != null)
+                query.FromTable = FromTable;
+            else
+                query.FromQuery = FromQuery;
+
+            query.WhereCondition = WhereCondition;
+            query.ListJoin = ListJoin;
+            query.Alias = Alias;
+
+            /// From InsertQuery
+            query.InsertColumns = InsertColumns;
+            query.InsertValues = InsertValues;
+            query.Table = Table;
+            query.FromTable = FromTable;
+
+            return query;
+        }
+
         public override string ToRawQuery() {
             StringBuilder sb = new StringBuilder();
 
@@ -65,6 +87,16 @@ namespace MSSQLWrapper.Query {
 
         public int ExecuteQuery() {
             using (SqlCommand cmd = GetSqlCommand()) {
+                cmd.CommandText = ToRawQuery();
+
+                AddCommandParams(cmd);
+
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
+        public int ExecuteQuery(SqlTransaction trans) {
+            using (SqlCommand cmd = GetSqlCommand(trans)) {
                 cmd.CommandText = ToRawQuery();
 
                 AddCommandParams(cmd);

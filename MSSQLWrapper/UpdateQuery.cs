@@ -50,6 +50,26 @@ namespace MSSQLWrapper.Query {
             
         }
 
+        public new UpdateQuery Clone() {
+            UpdateQuery query = new UpdateQuery(connection: Connection, timeout: Timeout);
+
+            /// From BaseQuery
+            if (FromTable != null)
+                query.FromTable = FromTable;
+            else
+                query.FromQuery = FromQuery;
+
+            query.WhereCondition = WhereCondition;
+            query.ListJoin = ListJoin;
+            query.Alias = Alias;
+
+            /// From UpdateQuery
+            query.UpdateColumns = UpdateColumns;
+            query.UpdateTable = UpdateTable;
+
+            return query;
+        }
+
         public override string ToRawQuery() {
             StringBuilder sb = new StringBuilder();
 
@@ -91,6 +111,16 @@ namespace MSSQLWrapper.Query {
 
         public int ExecuteQuery() {
             using (SqlCommand cmd = GetSqlCommand()) {
+                cmd.CommandText = ToRawQuery();
+
+                AddCommandParams(cmd);
+
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
+        public int ExecuteQuery(SqlTransaction trans) {
+            using (SqlCommand cmd = GetSqlCommand(trans)) {
                 cmd.CommandText = ToRawQuery();
 
                 AddCommandParams(cmd);

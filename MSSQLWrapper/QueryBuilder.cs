@@ -44,7 +44,18 @@ namespace MSSQLWrapper.Query {
         /// <param name="targetColumns">Columns with Key: target query column name, Value: condition</param>
         /// <returns></returns>
         public TQueryBuilder Join(SelectQuery otherQuery, string alias, Condition condition) {
-            Query.ListJoin.Add(Tuple.Create(otherQuery, alias, condition));
+            SelectQuery clone = otherQuery.Clone();
+            clone.Alias = alias;
+
+            var columns = condition.GetAllColumns()
+                                   .Where(r => r.Query == otherQuery)
+                                   .ToList();
+
+            for (int i = 0; i < columns.Count; i++) {
+                columns[i].Query = clone;
+            }
+
+            Query.ListJoin.Add(Tuple.Create(clone, condition));
 
             return builder;
         }
@@ -61,7 +72,7 @@ namespace MSSQLWrapper.Query {
                     condition.Append(Conditional.And, new Condition(otherQuery.NewColumn(columns[i]), Operator.Equals, Query.NewColumn(columns[i])));
                 }
 
-                Join(otherQuery, alias, condition);
+                return Join(otherQuery, alias, condition);
             }
 
             return builder;
