@@ -16,6 +16,9 @@ namespace MSSQLWrapper.Query {
         public int TopN { get; set; }
         public bool SelectDistinct { get; set; }
 
+        /// <summary>
+        /// Returns true if this object is equal to SELECT * FROM [Table]
+        /// </summary>
         public bool IsTableOnly {
             get {
                 return (
@@ -48,6 +51,10 @@ namespace MSSQLWrapper.Query {
             SelectDistinct = false;
         }
 
+        /// <summary>
+        /// Returns a new instance with exactly the same properties
+        /// </summary>
+        /// <returns></returns>
         public new SelectQuery Clone() {
             SelectQuery query = new SelectQuery(connection:Connection, timeout: Timeout);
 
@@ -128,8 +135,11 @@ namespace MSSQLWrapper.Query {
             return sb.ToString();
         }
 
+        /// <summary>
+        /// If the query only contains a table name, return table name directly
+        /// </summary>
+        /// <returns></returns>
         public string ToTableOrQuery() {
-            /// If the query only contains a table name, return table name directly
             return String.Format("{0}{1}{0}", Environment.NewLine, IsTableOnly ? (FromTable == null ? FromQuery.Item1.FromTable : FromTable) : $"({ToRawQuery()})");
         }
 

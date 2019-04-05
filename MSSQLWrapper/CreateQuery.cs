@@ -14,6 +14,7 @@ namespace MSSQLWrapper.Query {
         /// Tuple of [columnName, dataType, dataType args]
         /// </summary>
         public List<Tuple<string, DataType, int>> ListColumns { get; set; }
+        public Dictionary<string, Tuple<int, int>> IdentityColumns { get; set; }
 
         public CreateQuery(string fromTable = null, SqlConnection connection = null, int timeout = DefaultTimeout)
            : base(fromTable, connection, timeout) {
@@ -55,18 +56,44 @@ namespace MSSQLWrapper.Query {
         public override string ToRawQuery() {
             StringBuilder sb = new StringBuilder();
 
-            if (FromQuery == null) {
-                sb.AppendFormat("CREATE {0} (", Table)
+            if (FromTableOrQuery() == null) {
+                sb.AppendFormat("CREATE TABLE {0} (", Table)
                   .AppendLine();
 
                 foreach (var column in ListColumns) {
-                    sb.AppendFormat("{0} {1},", column.Item1, String.Format(column.Item2.GetStringValue(), column.Item3))
-                      .AppendLine();
+                    sb.AppendFormat("{0} {1}", column.Item1, String.Format(column.Item2.GetStringValue(), column.Item3));
+
+                    Tuple<int, int> idParam;
+
+                    if (IdentityColumns.TryGetValue(column.Item1, out idParam)) {
+                        sb.AppendFormat("IDENTITY({0}, {1})", idParam.Item1, idParam.Item2);
+                    }
+
+                    sb.AppendLine(",");
                 }
 
-                sb.Append(GetConstraintString());
+                if (ListConstraints.Count > 0) {
+                    sb.Append(GetConstraintString());
+                }
 
                 sb.AppendLine(");");
+            } else {
+                sb.AppendLine("SELECT")
+                  .AppendLine("*")
+                  .AppendLine("INTO")
+                  .AppendLine($" {Table}");
+
+                sb.AppendLine("FROM");
+
+                sb.AppendLine(FromTableOrQuery());
+
+                sb.Append(JoinString);
+
+                if (WhereCondition != null) {
+                    sb.AppendLine("WHERE");
+
+                    sb.AppendLine(" " + WhereCondition.ToString());
+                }
             }
 
             return sb.ToString();

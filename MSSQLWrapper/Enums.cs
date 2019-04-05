@@ -34,15 +34,6 @@ namespace MSSQLWrapper.Enums {
         Desc
     }
 
-    public enum QuickOption {
-        None,
-        Distinct,
-        Top10,
-        Top50,
-        Top100,
-        Top1000
-    }
-
     public enum Conditional {
         [EnumString("AND")]
         And,
@@ -145,9 +136,5 @@ namespace MSSQLWrapper.Enums {
         [EnumString("UNIQUE INDEX")]
         [EnumArgs(true)]
         UniqueIndex
-    }
-
-    public enum Function {
-
     }
 }

@@ -47,7 +47,7 @@ namespace MSSQLWrapper.Query {
             if (Constraint == Constraint.ForeignKey) {
                 return String.Format("CONSTRAINT {0} {1} REFERENCES {2}", Name, Constraint.GetStringValue(), String.Join(", ", Columns));
             } else {
-                return String.Format("CONSTRAINT {0} {1} ({2})", Name, Constraint.GetStringValue(), Arg == null ? String.Join(", ", Columns) : Arg);
+                return String.Format("CONSTRAINT {0} {1} ({2})", Name, Constraint.GetStringValue(), Arg ?? String.Join(", ", Columns));
             }
         }
     }

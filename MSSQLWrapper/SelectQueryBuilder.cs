@@ -13,7 +13,6 @@ namespace MSSQLWrapper.Query {
             Query = new SelectQuery(fromTable, connection, timeout);
         }
 
-
         public SelectQueryBuilder Select(params string[] columns) {
             Query.SelectColumns.AddRange(columns.Select(r => Query.NewColumn(r)));
 

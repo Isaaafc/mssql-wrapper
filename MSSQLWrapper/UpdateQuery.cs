@@ -8,6 +8,9 @@ using System.Data.SqlClient;
 
 namespace MSSQLWrapper.Query {
     public class UpdateQuery : BaseQuery {
+        /// <summary>
+        /// Represents a set of column value pairs to be updated
+        /// </summary>
         public struct UpdateSet {
             internal List<Tuple<Column, object>> ListSet { get; private set; }
 
@@ -41,8 +44,13 @@ namespace MSSQLWrapper.Query {
                 return String.Join($",{Environment.NewLine}", str);
             }
         }
-
+        /// <summary>
+        /// Columns and values to be updated
+        /// </summary>
         public UpdateSet UpdateColumns { get; set; }
+        /// <summary>
+        /// Table to be updated
+        /// </summary>
         public string UpdateTable { get; set; }
 
         public UpdateQuery(string fromTable = null, SqlConnection connection = null, int timeout = DefaultTimeout)
@@ -50,6 +58,10 @@ namespace MSSQLWrapper.Query {
             
         }
 
+        /// <summary>
+        /// Returns a new instance with exactly the same properties
+        /// </summary>
+        /// <returns></returns>
         public new UpdateQuery Clone() {
             UpdateQuery query = new UpdateQuery(connection: Connection, timeout: Timeout);
 
