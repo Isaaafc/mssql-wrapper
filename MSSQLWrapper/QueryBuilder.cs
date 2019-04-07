@@ -99,7 +99,7 @@ namespace MSSQLWrapper.Query {
         }
 
         public Column NewColumn(string name, string alias = null) {
-            return Query.NewColumn(name);
+            return Query.NewColumn(name, alias);
         }
     }
 }

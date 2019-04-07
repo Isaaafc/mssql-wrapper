@@ -14,15 +14,12 @@ namespace MSSQLWrapper.Query {
         public struct UpdateSet {
             internal List<Tuple<Column, object>> ListSet { get; private set; }
 
-            public UpdateSet(params object[] args) {
-                ListSet = new List<Tuple<Column, object>>();
-
-                for (int i = 0; i < args.Length; i += 2) {
-                    ListSet.Add(Tuple.Create(args[i] as Column, args[i + 1]));
-                }
+            public UpdateSet(params Tuple<Column, object>[] args) {
+                ListSet = new List<Tuple<Column, object>>(args);
 
                 /// Validate
-                var c = ListSet.Select(r => String.IsNullOrEmpty(r.Item1.Query.Alias) ? r.Item1.Query.FromTableOrAlias() : r.Item1.Query.Alias)
+                var c = ListSet.Select(r => r.Item1.Query == null ? null : r.Item1.Query.FromTableOrAlias())
+                               .Where(r => r != null)
                                .Distinct()
                                .Count();
 
@@ -113,11 +110,9 @@ namespace MSSQLWrapper.Query {
             base.AddCommandParams(cmd);
 
             for (int i = 0; i < UpdateColumns.ListSet.Count; i++) {
-                object val = UpdateColumns.ListSet[i];
+                var tuple = UpdateColumns.ListSet[i];
 
-                if (!(val is Column)) {
-                    cmd.Parameters.Add(new SqlParameter($"@updateParam{i}", val));
-                }
+                cmd.Parameters.Add(new SqlParameter($"@updateParam{i}", tuple.Item2 ?? DBNull.Value));
             }
         }
 

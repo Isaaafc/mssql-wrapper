@@ -14,12 +14,19 @@ namespace MSSQLWrapper.Query {
         /// Tuple of [columnName, dataType, dataType args]
         /// </summary>
         public List<Tuple<string, DataType, int>> ListColumns { get; set; }
+        /// <summary>
+        /// Identity columns
+        /// Key: column name, Value: seed, increment
+        /// </summary>
         public Dictionary<string, Tuple<int, int>> IdentityColumns { get; set; }
 
         public CreateQuery(string fromTable = null, SqlConnection connection = null, int timeout = DefaultTimeout)
            : base(fromTable, connection, timeout) {
+
             ListConstraints = new List<TableConstraint>();
             ListColumns = new List<Tuple<string, DataType, int>>();
+
+            IdentityColumns = new Dictionary<string, Tuple<int, int>>();
         }
 
         public new CreateQuery Clone() {
@@ -39,6 +46,7 @@ namespace MSSQLWrapper.Query {
             query.Table = Table;
             query.ListConstraints = ListConstraints;
             query.ListColumns = ListColumns;
+            query.IdentityColumns = IdentityColumns;
 
             return query;
         }
@@ -66,7 +74,7 @@ namespace MSSQLWrapper.Query {
                     Tuple<int, int> idParam;
 
                     if (IdentityColumns.TryGetValue(column.Item1, out idParam)) {
-                        sb.AppendFormat("IDENTITY({0}, {1})", idParam.Item1, idParam.Item2);
+                        sb.AppendFormat(" IDENTITY({0}, {1})", idParam.Item1, idParam.Item2);
                     }
 
                     sb.AppendLine(",");

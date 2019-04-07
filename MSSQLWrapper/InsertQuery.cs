@@ -15,8 +15,9 @@ namespace MSSQLWrapper.Query {
 
         public override string FromTable {
             set {
-                if (value != null)
+                if (value != null) {
                     FromQuery = Tuple.Create(new SelectQuery(value), (string)null);
+                }
             }
         }
 
@@ -55,7 +56,7 @@ namespace MSSQLWrapper.Query {
 
             if (InsertColumns.Count > 0) {
                 sb.AppendLine(" (")
-                  .AppendLine(String.Join($",{Environment.NewLine}", InsertColumns.Select(r => $"[{r.Name}]")))
+                  .AppendLine(String.Join($",{Environment.NewLine}", InsertColumns.Select(r => $" [{r.Name}]")))
                   .AppendLine(")");
             } else {
                 sb.AppendLine();
@@ -64,7 +65,7 @@ namespace MSSQLWrapper.Query {
             if (FromQuery == null) {
                 sb.AppendLine("VALUES (");
 
-                sb.AppendLine(String.Join($",{Environment.NewLine}", Enumerable.Range(0, InsertValues.Count).Select(r => $"@insertParam{r}")))
+                sb.AppendLine(String.Join($",{Environment.NewLine}", Enumerable.Range(0, InsertValues.Count).Select(r => $" @insertParam{r}")))
                   .AppendLine(")");
             } else {
                 sb.AppendLine(FromQuery.Item1.ToRawQuery());

@@ -13,25 +13,9 @@ namespace MSSQLWrapper.Query {
             Query = new InsertQuery(fromTable, connection, timeout);
         }
 
-        public InsertQueryBuilder Insert(params Column[] columns) {
-            var tables = columns.Select(r => r.Query.FromTable);
-
-            if (tables.Count() > 1) {
-                throw new ArgumentException("Columns must belong to a single table.");
-            }
-
-            Query.Table = tables.First();
-
-            Query.InsertColumns = new List<Column>(columns);
-
-            return this;
-        }
-
         public InsertQueryBuilder Insert(string table, params string[] columns) {
-            BaseQuery query = new BaseQuery(table);
-
             Query.Table = table;
-            Query.InsertColumns = new List<Column>(columns.Select(r => query.NewColumn(r)));
+            Query.InsertColumns = new List<Column>(columns.Select(r => new Column(r)));
 
             return this;
         }
