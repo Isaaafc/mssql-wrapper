@@ -49,22 +49,14 @@ namespace MSSQLWrapper.Query {
             return builder;
         }
 
-        public SelectQueryBuilder OrderBy(params object[] columns) {
-            ArgumentException e = new ArgumentException("Invalid arguments: params must be in pairs of (Columns/string, Order)");
+        public SelectQueryBuilder Having(Condition condition) {
+            Query.HavingCondition = condition;
 
-            for (int i = 0; i < columns.Length; i += 2) {
-                if (i + 1 >= columns.Length || !(columns[i + 1] is Order)) {
-                    throw e;
-                }
+            return builder;
+        }
 
-                if (columns[i] is string) {
-                    Query.OrderByColumns.Add(Tuple.Create(Query.NewColumn((string)columns[i]), (Order)columns[i + 1]));
-                } else if (columns[i] is Column) {
-                    Query.OrderByColumns.Add(Tuple.Create((Column)columns[i], (Order)columns[i + 1]));
-                } else {
-                    throw e;
-                }
-            }
+        public SelectQueryBuilder OrderBy(params Tuple<Column, Order>[] columns) {
+            Query.OrderByColumns = new List<Tuple<Column, Order>>(columns);
 
             return builder;
         }

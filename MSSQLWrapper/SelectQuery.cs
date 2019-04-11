@@ -11,7 +11,7 @@ namespace MSSQLWrapper.Query {
     public class SelectQuery : BaseQuery {
         public List<Column> SelectColumns { get; set; }
         public List<Column> GroupByColumns { get; set; }
-        public List<Condition> HavingColumns { get; set; }
+        public Condition HavingCondition { get; set; }
         public List<Tuple<Column, Order>> OrderByColumns { get; set; }
         public int TopN { get; set; }
         public bool SelectDistinct { get; set; }
@@ -24,11 +24,11 @@ namespace MSSQLWrapper.Query {
                 return (
                     SelectColumns.Count == 0
                     && GroupByColumns.Count == 0
-                    && HavingColumns.Count == 0
                     && OrderByColumns.Count == 0
                     && TopN == -1
                     && SelectDistinct == false
                     && ListJoin.Count == 0
+                    && HavingCondition == null
                     && WhereCondition == null
                     && (FromQuery == null || FromQuery.Item1.IsTableOnly)
                 );
@@ -41,8 +41,6 @@ namespace MSSQLWrapper.Query {
             SelectColumns = new List<Column>();
 
             GroupByColumns = new List<Column>();
-
-            HavingColumns = new List<Condition>();
 
             OrderByColumns = new List<Tuple<Column, Order>>();
 
@@ -71,7 +69,7 @@ namespace MSSQLWrapper.Query {
             /// From SelectQuery
             query.SelectColumns = SelectColumns;
             query.GroupByColumns = GroupByColumns;
-            query.HavingColumns = HavingColumns;
+            query.HavingCondition = HavingCondition;
             query.OrderByColumns = OrderByColumns;
             query.TopN = TopN;
             query.SelectDistinct = SelectDistinct;
@@ -126,6 +124,12 @@ namespace MSSQLWrapper.Query {
                 sb.AppendLine(String.Join(",", GroupByColumns.Select(r => " " + r.FullName)));
             }
 
+            if (HavingCondition != null) {
+                sb.AppendLine("HAVING");
+
+                sb.AppendLine(" " + HavingCondition.ToString());
+            }
+
             if (OrderByColumns.Count > 0) {
                 sb.AppendLine("ORDER BY");
 
@@ -141,6 +145,18 @@ namespace MSSQLWrapper.Query {
         /// <returns></returns>
         public string ToTableOrQuery() {
             return String.Format("{0}{1}{0}", Environment.NewLine, IsTableOnly ? (FromTable == null ? FromQuery.Item1.FromTable : FromTable) : $"({ToRawQuery()})");
+        }
+
+        protected override void AddCommandParams(SqlCommand cmd) {
+            base.AddCommandParams(cmd);
+
+            if (HavingCondition != null) {
+                foreach (Condition condition in HavingCondition.GetAllConditions()) {
+                    if (!String.IsNullOrEmpty(condition.Name) && condition.Value != null && !(condition.Value is Column)) {
+                        cmd.Parameters.Add(new SqlParameter(condition.Name, condition.Value));
+                    }
+                }
+            }
         }
 
         public DataTable ExecuteQuery() {
