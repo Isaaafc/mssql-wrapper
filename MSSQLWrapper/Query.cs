@@ -100,16 +100,39 @@ namespace MSSQLWrapper.Query {
             return new Column(query: this, name: name, alias: alias);
         }
 
-        protected virtual void AddCommandParams(SqlCommand cmd) {
-            cmd.Parameters.Clear();
-
+        /// <summary>
+        /// Gets a flatted list of all conditions associated with this query
+        /// </summary>
+        /// <returns></returns>
+        protected virtual List<Condition> GetConditions() {
             var listConditions = new List<Condition>();
 
             if (WhereCondition != null) {
                 listConditions.AddRange(WhereCondition.GetAllConditions());
             }
 
+            /// All Conditions from Join
             listConditions.AddRange(ListJoin.Select(r => r.Item2.GetAllConditions()).SelectMany(r => r));
+
+            /// All Conditions from joined Queries
+            listConditions.AddRange(ListJoin.Select(r => r.Item1.GetConditions()).SelectMany(r => r));
+
+            /// All Conditions from FromQuery
+            if (FromQuery != null) {
+                listConditions.AddRange(FromQuery.Item1.GetConditions());
+            }
+
+            return listConditions;
+        }
+
+        protected void AssignParamNames(List<Condition> listConditions) {
+            for (int i = 0; i < listConditions.Count; i++) {
+                listConditions[i].Name = $"@param{i}";
+            }
+        }
+
+        protected virtual void AddCommandParams(SqlCommand cmd, List<Condition> listConditions) {
+            cmd.Parameters.Clear();
 
             foreach (Condition condition in listConditions) {
                 if (!String.IsNullOrEmpty(condition.Name) && condition.Value != null && !(condition.Value is Column)) {
@@ -118,7 +141,15 @@ namespace MSSQLWrapper.Query {
             }
         }
 
-        public virtual string ToRawQuery() {
+        public string ToRawQuery() {
+            var listConditions = GetConditions();
+
+            AssignParamNames(listConditions);
+
+            return ToRawQuery(listConditions);
+        }
+
+        protected virtual string ToRawQuery(List<Condition> listConditions) {
             return FromTable;
         }
 

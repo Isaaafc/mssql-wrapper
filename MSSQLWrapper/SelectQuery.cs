@@ -77,7 +77,7 @@ namespace MSSQLWrapper.Query {
             return query;
         }
 
-        public override string ToRawQuery() {
+        protected override string ToRawQuery(List<Condition> listConditions) {
             StringBuilder sb = new StringBuilder();
 
             sb.AppendLine("SELECT");
@@ -147,23 +147,23 @@ namespace MSSQLWrapper.Query {
             return String.Format("{0}{1}{0}", Environment.NewLine, IsTableOnly ? (FromTable == null ? FromQuery.Item1.FromTable : FromTable) : $"({ToRawQuery()})");
         }
 
-        protected override void AddCommandParams(SqlCommand cmd) {
-            base.AddCommandParams(cmd);
+        protected override List<Condition> GetConditions() {
+            var listConditions = base.GetConditions();
 
             if (HavingCondition != null) {
-                foreach (Condition condition in HavingCondition.GetAllConditions()) {
-                    if (!String.IsNullOrEmpty(condition.Name) && condition.Value != null && !(condition.Value is Column)) {
-                        cmd.Parameters.Add(new SqlParameter(condition.Name, condition.Value));
-                    }
-                }
+                listConditions.AddRange(HavingCondition.GetAllConditions());
             }
+
+            return listConditions;
         }
 
         public DataTable ExecuteQuery() {
             using (SqlCommand cmd = GetSqlCommand()) {
-                cmd.CommandText = ToRawQuery();
+                var listConditions = GetConditions();
+                AssignParamNames(listConditions);
 
-                AddCommandParams(cmd);
+                cmd.CommandText = ToRawQuery(listConditions);
+                AddCommandParams(cmd, listConditions);
 
                 DataTable dt = new DataTable();
 
@@ -177,9 +177,11 @@ namespace MSSQLWrapper.Query {
 
         public SqlDataReader ExecuteReader() {
             using (SqlCommand cmd = GetSqlCommand()) {
-                cmd.CommandText = ToRawQuery();
+                var listConditions = GetConditions();
+                AssignParamNames(listConditions);
 
-                AddCommandParams(cmd);
+                cmd.CommandText = ToRawQuery(listConditions);
+                AddCommandParams(cmd, listConditions);
 
                 return cmd.ExecuteReader();
             }

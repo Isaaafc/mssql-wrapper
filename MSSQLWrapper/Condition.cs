@@ -10,13 +10,12 @@ namespace MSSQLWrapper.Query {
     /// Represents a full condition clause such as ((a = b and b = c) or c = d ...)
     /// </summary>
     public class Condition {
-        private static int count = 0;
         public Operator Operator { get; set; }
         public Column Column { get; set; }
         /// <summary>
         /// Name of param to be inserted in SQLCommand
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; internal set; }
         public object Value { get; set; }
 
         public List<Tuple<Conditional, Condition>> ListConditions { get; private set; }
@@ -24,7 +23,6 @@ namespace MSSQLWrapper.Query {
         public Condition() {
             ListConditions = new List<Tuple<Conditional, Condition>>();
             Operator = Operator.Equals;
-            Name = $"@param{count++}";
         }
 
         public Condition(Column column, Operator op, object value = null)

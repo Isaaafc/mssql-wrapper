@@ -61,7 +61,7 @@ namespace MSSQLWrapper.Query {
             return sb.ToString();
         }
 
-        public override string ToRawQuery() {
+        protected override string ToRawQuery(List<Condition> listConditions) {
             StringBuilder sb = new StringBuilder();
 
             if (FromTableOrQuery() == null) {
@@ -109,9 +109,11 @@ namespace MSSQLWrapper.Query {
 
         public int ExecuteQuery() {
             using (SqlCommand cmd = GetSqlCommand()) {
-                cmd.CommandText = ToRawQuery();
+                var listConditions = GetConditions();
+                AssignParamNames(listConditions);
 
-                AddCommandParams(cmd);
+                cmd.CommandText = ToRawQuery(listConditions);
+                AddCommandParams(cmd, listConditions);
 
                 return cmd.ExecuteNonQuery();
             }
@@ -119,9 +121,11 @@ namespace MSSQLWrapper.Query {
 
         public int ExecuteQuery(SqlTransaction trans) {
             using (SqlCommand cmd = GetSqlCommand(trans)) {
-                cmd.CommandText = ToRawQuery();
+                var listConditions = GetConditions();
+                AssignParamNames(listConditions);
 
-                AddCommandParams(cmd);
+                cmd.CommandText = ToRawQuery(listConditions);
+                AddCommandParams(cmd, listConditions);
 
                 return cmd.ExecuteNonQuery();
             }
