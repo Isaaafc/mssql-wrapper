@@ -4,6 +4,8 @@ This wrapper allows you to build and execute queries directly in C# code, so tha
 
 ## Usage
 
+This section is a brief introduction. More examples can be found at https://github.com/Isaaafc/mssql-wrapper-examples
+
 There are currently 4 types of queries implemented: Select, Insert, Update, Create. They all work in similar ways. 
 
 Builders are used to build queries.

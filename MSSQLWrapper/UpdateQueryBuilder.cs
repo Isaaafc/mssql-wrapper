@@ -18,5 +18,12 @@ namespace MSSQLWrapper.Query {
 
             return builder;
         }
+
+        public UpdateQueryBuilder Update(string table, params Tuple<Column, object>[] updateColumns) {
+            Query.UpdateTable = table;
+            Query.UpdateColumns = new UpdateQuery.UpdateSet(updateColumns);
+
+            return builder;
+        }
     }
 }
