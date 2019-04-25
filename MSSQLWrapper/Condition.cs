@@ -10,8 +10,10 @@ namespace MSSQLWrapper.Query {
     /// Represents a full condition clause such as ((a = b and b = c) or c = d ...)
     /// </summary>
     public class Condition {
-        public Operator Operator { get; set; }
+        private static int count = 0;
+        public SqlOperator Operator { get; set; }
         public Column Column { get; set; }
+
         /// <summary>
         /// Name of param to be inserted in SQLCommand
         /// </summary>
@@ -22,10 +24,11 @@ namespace MSSQLWrapper.Query {
 
         public Condition() {
             ListConditions = new List<Tuple<Conditional, Condition>>();
-            Operator = Operator.Equals;
+            Operator = SqlOperator.Equals;
+            Name = $"@param{count++}";
         }
 
-        public Condition(Column column, Operator op, object value = null)
+        public Condition(Column column, SqlOperator op, object value = null)
             : this() {
             Column = column;
             Operator = op;
@@ -38,7 +41,7 @@ namespace MSSQLWrapper.Query {
             return this;
         }
 
-        public Condition And(Column column, Operator op, object value = null) {
+        public Condition And(Column column, SqlOperator op, object value = null) {
             Condition otherCondition = new Condition(column, op, value);
 
             return Append(Conditional.And, otherCondition);
@@ -48,7 +51,7 @@ namespace MSSQLWrapper.Query {
             return Append(Conditional.And, otherCondition);
         }
 
-        public Condition Or(Column column, Operator op, object value = null) {
+        public Condition Or(Column column, SqlOperator op, object value = null) {
             Condition otherCondition = new Condition(column, op, value);
 
             return Append(Conditional.Or, otherCondition);
@@ -65,7 +68,7 @@ namespace MSSQLWrapper.Query {
 
             sb.AppendFormat("{0} {1}", Column.FullName, Operator.GetStringValue());
 
-            if (Operator != Operator.IsNotNull && Operator != Operator.IsNull) {
+            if (Operator != SqlOperator.IsNotNull && Operator != SqlOperator.IsNull) {
                 sb.Append(" " + (Value is Column ? ((Column)Value).FullName : Name));
             }
 

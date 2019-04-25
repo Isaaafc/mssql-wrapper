@@ -60,7 +60,7 @@ namespace MSSQLWrapper.Query {
             return builder;
         }
 
-        public TQueryBuilder Join(SelectQuery otherQuery, string alias, Operator op, params string[] columns) {
+        public TQueryBuilder Join(SelectQuery otherQuery, string alias, SqlOperator op, params string[] columns) {
             Condition condition = new Condition();
 
             if (columns.Length > 0) {
@@ -69,7 +69,7 @@ namespace MSSQLWrapper.Query {
                 condition.Value = Query.NewColumn(columns[0]);
 
                 for (int i = 1; i < columns.Length; i++) {
-                    condition.Append(Conditional.And, new Condition(otherQuery.NewColumn(columns[i]), Operator.Equals, Query.NewColumn(columns[i])));
+                    condition.Append(Conditional.And, new Condition(otherQuery.NewColumn(columns[i]), SqlOperator.Equals, Query.NewColumn(columns[i])));
                 }
 
                 return Join(otherQuery, alias, condition);
@@ -82,7 +82,7 @@ namespace MSSQLWrapper.Query {
             return Join(new SelectQuery(otherTable), alias, condition);
         }
 
-        public TQueryBuilder Join(string otherTable, string alias, Operator op, params string[] columns) {
+        public TQueryBuilder Join(string otherTable, string alias, SqlOperator op, params string[] columns) {
             return Join(new SelectQuery(otherTable), alias, op, columns);
         }
 
@@ -92,7 +92,7 @@ namespace MSSQLWrapper.Query {
             return builder;
         }
 
-        public TQueryBuilder Where(Column column, Operator op, object value) {
+        public TQueryBuilder Where(Column column, SqlOperator op, object value) {
             Query.WhereCondition = new Condition(column, op, value);
 
             return builder;

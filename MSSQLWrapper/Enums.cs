@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace MSSQLWrapper.Enums {
-    public enum Operator {
+    public enum SqlOperator {
         [EnumString("=")]
         Equals,
         [EnumString(">")]
