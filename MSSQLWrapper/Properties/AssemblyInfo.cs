@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("MSSQLWrapper")]
 [assembly: AssemblyDescription("MSSQL Wrapper library")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Isaac Phua")]
 [assembly: AssemblyProduct("MSSQLWrapper")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]

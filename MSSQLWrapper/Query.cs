@@ -55,20 +55,21 @@ namespace MSSQLWrapper.Query {
         public int Timeout { get; set; }
         public SqlConnection Connection { get; set; }
         public Condition WhereCondition { get; set; }
-        public List<Tuple<SelectQuery, Condition>> ListJoin { get; set; }
+        public List<JoinClause> ListJoin { get; set; }
 
         public string JoinString {
             get {
                 StringBuilder sb = new StringBuilder();
 
                 for (int i = 0; i < ListJoin.Count; i++) {
-                    var tuple = ListJoin[i];
+                    var joinClause = ListJoin[i];
 
-                    sb.AppendLine("JOIN")
-                      .AppendFormat("{0}{1}", tuple.Item1.ToTableOrQuery(), String.IsNullOrEmpty(tuple.Item1.Alias) ? "" : $" AS {tuple.Item1.Alias}")
+                    sb.AppendFormat("{0}JOIN", joinClause.Type == JoinType.Inner ? "" : $"{joinClause.Type.GetStringValue()} ")
+                      .AppendLine()
+                      .AppendFormat("{0}{1}", joinClause.Query.ToTableOrQuery(), String.IsNullOrEmpty(joinClause.Query.Alias) ? "" : $" AS {joinClause.Query.Alias}")
                       .AppendLine();
 
-                    sb.AppendFormat(" ON {0}", tuple.Item2.ToString())
+                    sb.AppendFormat(" ON {0}", joinClause.Condition.ToString())
                       .AppendLine();
                 }
 
@@ -81,7 +82,7 @@ namespace MSSQLWrapper.Query {
 
             Timeout = timeout;
 
-            ListJoin = new List<Tuple<SelectQuery, Condition>>();
+            ListJoin = new List<JoinClause>();
 
             FromTable = fromTable;
         }
@@ -112,10 +113,10 @@ namespace MSSQLWrapper.Query {
             }
 
             /// All Conditions from Join
-            listConditions.AddRange(ListJoin.Select(r => r.Item2.GetAllConditions()).SelectMany(r => r));
+            listConditions.AddRange(ListJoin.Select(r => r.Condition.GetAllConditions()).SelectMany(r => r));
 
             /// All Conditions from joined Queries
-            listConditions.AddRange(ListJoin.Select(r => r.Item1.GetConditions()).SelectMany(r => r));
+            listConditions.AddRange(ListJoin.Select(r => r.Query.GetConditions()).SelectMany(r => r));
 
             /// All Conditions from FromQuery
             if (FromQuery != null) {

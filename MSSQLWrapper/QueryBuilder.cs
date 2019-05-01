@@ -43,7 +43,7 @@ namespace MSSQLWrapper.Query {
         /// <param name="targetQuery"></param>
         /// <param name="targetColumns">Columns with Key: target query column name, Value: condition</param>
         /// <returns></returns>
-        public TQueryBuilder Join(SelectQuery otherQuery, string alias, Condition condition) {
+        public TQueryBuilder Join(JoinType joinType, SelectQuery otherQuery, string alias, Condition condition) {
             SelectQuery clone = otherQuery.Clone();
             clone.Alias = alias;
 
@@ -55,12 +55,12 @@ namespace MSSQLWrapper.Query {
                 columns[i].Query = clone;
             }
 
-            Query.ListJoin.Add(Tuple.Create(clone, condition));
+            Query.ListJoin.Add(new JoinClause(joinType, clone, condition));
 
             return builder;
         }
 
-        public TQueryBuilder Join(SelectQuery otherQuery, string alias, SqlOperator op, params string[] columns) {
+        public TQueryBuilder Join(JoinType joinType, SelectQuery otherQuery, string alias, SqlOperator op, params string[] columns) {
             Condition condition = new Condition();
 
             if (columns.Length > 0) {
@@ -72,18 +72,18 @@ namespace MSSQLWrapper.Query {
                     condition.Append(Conditional.And, new Condition(otherQuery.NewColumn(columns[i]), SqlOperator.Equals, Query.NewColumn(columns[i])));
                 }
 
-                return Join(otherQuery, alias, condition);
+                return Join(joinType, otherQuery, alias, condition);
             }
 
             return builder;
         }
 
-        public TQueryBuilder Join(string otherTable, string alias, Condition condition) {
-            return Join(new SelectQuery(otherTable), alias, condition);
+        public TQueryBuilder Join(JoinType joinType, string otherTable, string alias, Condition condition) {
+            return Join(joinType, new SelectQuery(otherTable), alias, condition);
         }
 
-        public TQueryBuilder Join(string otherTable, string alias, SqlOperator op, params string[] columns) {
-            return Join(new SelectQuery(otherTable), alias, op, columns);
+        public TQueryBuilder Join(JoinType joinType, string otherTable, string alias, SqlOperator op, params string[] columns) {
+            return Join(joinType, new SelectQuery(otherTable), alias, op, columns);
         }
 
         public TQueryBuilder Where(Condition condition) {

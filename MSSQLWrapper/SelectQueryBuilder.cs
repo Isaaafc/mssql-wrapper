@@ -55,6 +55,12 @@ namespace MSSQLWrapper.Query {
             return builder;
         }
 
+        public SelectQueryBuilder Having(Column column, SqlOperator op, object value) {
+            Query.HavingCondition = new Condition(column, op, value);
+
+            return builder;
+        }
+
         public SelectQueryBuilder OrderBy(params Tuple<Column, Order>[] columns) {
             Query.OrderByColumns = new List<Tuple<Column, Order>>(columns);
 

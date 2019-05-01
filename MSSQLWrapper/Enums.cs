@@ -137,4 +137,19 @@ namespace MSSQLWrapper.Enums {
         [EnumArgs(true)]
         UniqueIndex
     }
+
+    public enum JoinType {
+        [EnumString("")]
+        Inner,
+        [EnumString("LEFT")]
+        LeftInner,
+        [EnumString("RIGHT")]
+        RightInner,
+        [EnumString("FULL OUTER")]
+        FullOuter,
+        [EnumString("LEFT OUTER")]
+        LeftOuter,
+        [EnumString("RIGHT OUTER")]
+        RightOuter
+    }
 }

@@ -35,7 +35,7 @@ namespace MSSQLWrapper.Query {
                     Column left = ListSet[i].Item1;
                     object right = ListSet[i].Item2;
 
-                    str[i] = String.Format("{0} = {1}", left.FullName, (right is Column) ? (right as Column).FullName : $"@updateParam{i}");
+                    str[i] = String.Format(" {0} = {1}", left.FullName, (right is Column) ? (right as Column).FullName : $"@updateParam{i}");
                 }
 
                 return String.Join($",{Environment.NewLine}", str);

@@ -133,7 +133,7 @@ namespace MSSQLWrapper.Query {
             if (OrderByColumns.Count > 0) {
                 sb.AppendLine("ORDER BY");
 
-                sb.AppendLine(String.Join(",", OrderByColumns.Select(r => String.Format(" [{0}] {1}", String.IsNullOrEmpty(r.Item1.Alias)?r.Item1.Name:r.Item1.Alias, r.Item2.GetStringValue()))));
+                sb.AppendLine(String.Join(",", OrderByColumns.Select(r => String.Format(" {0} {1}", String.IsNullOrEmpty(r.Item1.Alias) ? r.Item1.FullName : r.Item1.Alias, r.Item2.GetStringValue()))));
             }
 
             return sb.ToString();
@@ -144,7 +144,7 @@ namespace MSSQLWrapper.Query {
         /// </summary>
         /// <returns></returns>
         public string ToTableOrQuery() {
-            return String.Format("{0}{1}{0}", Environment.NewLine, IsTableOnly ? (FromTable == null ? FromQuery.Item1.FromTable : FromTable) : $"({ToRawQuery()})");
+            return String.Format("{1}{0}", Environment.NewLine, IsTableOnly ? (FromTable == null ? FromQuery.Item1.FromTable : FromTable) : $"({ToRawQuery()})");
         }
 
         protected override List<Condition> GetConditions() {

@@ -69,7 +69,7 @@ namespace MSSQLWrapper.Query {
                   .AppendLine();
 
                 foreach (var column in ListColumns) {
-                    sb.AppendFormat("{0} {1}", column.Item1, String.Format(column.Item2.GetStringValue(), column.Item3));
+                    sb.AppendFormat(" {0} {1}", column.Item1, String.Format(column.Item2.GetStringValue(), column.Item3));
 
                     Tuple<int, int> idParam;
 
@@ -87,7 +87,7 @@ namespace MSSQLWrapper.Query {
                 sb.AppendLine(");");
             } else {
                 sb.AppendLine("SELECT")
-                  .AppendLine("*")
+                  .AppendLine(" *")
                   .AppendLine("INTO")
                   .AppendLine($" {Table}");
 
@@ -100,7 +100,7 @@ namespace MSSQLWrapper.Query {
                 if (WhereCondition != null) {
                     sb.AppendLine("WHERE");
 
-                    sb.AppendLine(" " + WhereCondition.ToString());
+                    sb.AppendLine($"  {WhereCondition.ToString()}");
                 }
             }
 

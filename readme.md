@@ -4,8 +4,6 @@ This wrapper allows you to build and execute queries directly in C# code, so tha
 
 ## Usage
 
-This section is a brief introduction. More examples can be found at https://github.com/Isaaafc/mssql-wrapper-examples
-
 There are currently 4 types of queries implemented: Select, Insert, Update, Create. They all work in similar ways. 
 
 Builders are used to build queries.
@@ -30,6 +28,8 @@ The Column class represents a column from a table / query. The Condition class d
 
 ```
 select.Join(
+            /// Join type
+            JoinType.Inner,
             /// Table name or SelectQuery class
             "[dbo].[Table2]",
             /// Alias for Table2
@@ -49,7 +49,6 @@ SELECT
 FROM
 [dbo].[Table1]
 JOIN
-
 [dbo].[Table2]
  AS t2
  ON ([Column2] = [dbo].[Table1].[Column1])
