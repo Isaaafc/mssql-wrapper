@@ -67,5 +67,11 @@ namespace MSSQLWrapper.Query {
             return builder;
         }
 
+        public SelectQueryBuilder OrderBy(params Column[] columns) {
+            Query.OrderByColumns = columns.Select(r => Tuple.Create(r, Order.Asc))
+                                          .ToList();
+
+            return builder;
+        }
     }
 }

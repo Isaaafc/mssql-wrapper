@@ -38,10 +38,8 @@ namespace MSSQLWrapper.Query {
         }
 
         /// <summary>
-        /// Joins queries
+        /// Joins queries. Default inner join
         /// </summary>
-        /// <param name="targetQuery"></param>
-        /// <param name="targetColumns">Columns with Key: target query column name, Value: condition</param>
         /// <returns></returns>
         public TQueryBuilder Join(JoinType joinType, SelectQuery otherQuery, string alias, Condition condition) {
             SelectQuery clone = otherQuery.Clone();
@@ -84,6 +82,22 @@ namespace MSSQLWrapper.Query {
 
         public TQueryBuilder Join(JoinType joinType, string otherTable, string alias, SqlOperator op, params string[] columns) {
             return Join(joinType, new SelectQuery(otherTable), alias, op, columns);
+        }
+
+        public TQueryBuilder Join(SelectQuery otherQuery, string alias, Condition condition) {
+            return Join(JoinType.Inner, otherQuery, alias, condition);
+        }
+
+        public TQueryBuilder Join(SelectQuery otherQuery, string alias, SqlOperator op, params string[] columns) {
+            return Join(JoinType.Inner, otherQuery, alias, op, columns);
+        }
+
+        public TQueryBuilder Join(string otherTable, string alias, Condition condition) {
+            return Join(JoinType.Inner, otherTable, alias, condition);
+        }
+
+        public TQueryBuilder Join(string otherTable, string alias, SqlOperator op, params string[] columns) {
+            return Join(JoinType.Inner, otherTable, alias, op, columns);
         }
 
         public TQueryBuilder Where(Condition condition) {
