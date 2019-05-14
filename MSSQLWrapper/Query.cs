@@ -77,19 +77,18 @@ namespace MSSQLWrapper.Query {
             }
         }
 
-        public BaseQuery(string fromTable = null, SqlConnection connection = null, int timeout = DefaultTimeout) {
+        public BaseQuery(SqlConnection connection = null, int timeout = DefaultTimeout) {
             Connection = connection;
 
             Timeout = timeout;
 
             ListJoin = new List<JoinClause>();
-
-            FromTable = fromTable;
         }
 
         protected BaseQuery Clone() {
-            BaseQuery query = new BaseQuery(FromTable, Connection, Timeout);
+            BaseQuery query = new BaseQuery(Connection, Timeout);
 
+            query.FromTable = FromTable;
             query.FromQuery = FromQuery;
             query.WhereCondition = WhereCondition;
             query.ListJoin = ListJoin;

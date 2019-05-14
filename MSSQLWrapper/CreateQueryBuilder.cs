@@ -9,9 +9,9 @@ using MSSQLWrapper.Enums;
 namespace MSSQLWrapper.Query {
     public class CreateQueryBuilder : QueryBuilder<CreateQuery, CreateQueryBuilder> {
 
-        public CreateQueryBuilder(string fromTable = null, SqlConnection connection = null, int timeout = DefaultTimeout)
+        public CreateQueryBuilder(SqlConnection connection = null, int timeout = DefaultTimeout)
             : base() {
-            Query = new CreateQuery(fromTable, connection, timeout);
+            Query = new CreateQuery(connection, timeout);
         }
 
         public CreateQueryBuilder Create(string table) {

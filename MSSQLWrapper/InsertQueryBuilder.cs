@@ -8,9 +8,9 @@ using System.Data.SqlClient;
 
 namespace MSSQLWrapper.Query {
     public class InsertQueryBuilder : QueryBuilder<InsertQuery, InsertQueryBuilder> {
-        public InsertQueryBuilder(string fromTable = null, SqlConnection connection = null, int timeout = DefaultTimeout)
+        public InsertQueryBuilder(SqlConnection connection = null, int timeout = DefaultTimeout)
             : base() {
-            Query = new InsertQuery(fromTable, connection, timeout);
+            Query = new InsertQuery(connection, timeout);
         }
 
         public InsertQueryBuilder Insert(string table, params string[] columns) {

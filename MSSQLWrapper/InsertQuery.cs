@@ -21,8 +21,8 @@ namespace MSSQLWrapper.Query {
             }
         }
 
-        public InsertQuery(string fromTable = null, SqlConnection connection = null, int timeout = DefaultTimeout)
-            : base(fromTable, connection, timeout) {
+        public InsertQuery(SqlConnection connection = null, int timeout = DefaultTimeout)
+            : base(connection, timeout) {
             InsertColumns = new List<Column>();
             InsertValues = new List<object>();
         }

@@ -20,8 +20,8 @@ namespace MSSQLWrapper.Query {
         /// </summary>
         public Dictionary<string, Tuple<int, int>> IdentityColumns { get; set; }
 
-        public CreateQuery(string fromTable = null, SqlConnection connection = null, int timeout = DefaultTimeout)
-           : base(fromTable, connection, timeout) {
+        public CreateQuery(SqlConnection connection = null, int timeout = DefaultTimeout)
+           : base(connection, timeout) {
 
             ListConstraints = new List<TableConstraint>();
             ListColumns = new List<Tuple<string, DataType, int>>();

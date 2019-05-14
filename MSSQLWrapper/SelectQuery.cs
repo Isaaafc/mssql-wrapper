@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MSSQLWrapper.Enums;
 using System.Data;
+using System.Dynamic;
 
 namespace MSSQLWrapper.Query {
     public class SelectQuery : BaseQuery {
@@ -36,7 +37,7 @@ namespace MSSQLWrapper.Query {
         }
 
         public SelectQuery(string fromTable = null, SqlConnection connection = null, int timeout = DefaultTimeout)
-            : base(fromTable, connection, timeout) {
+            : base(connection, timeout) {
 
             SelectColumns = new List<Column>();
 
@@ -47,6 +48,8 @@ namespace MSSQLWrapper.Query {
             TopN = -1;
 
             SelectDistinct = false;
+
+            FromTable = fromTable;
         }
 
         /// <summary>
@@ -54,7 +57,7 @@ namespace MSSQLWrapper.Query {
         /// </summary>
         /// <returns></returns>
         public new SelectQuery Clone() {
-            SelectQuery query = new SelectQuery(connection:Connection, timeout: Timeout);
+            SelectQuery query = new SelectQuery(connection: Connection, timeout: Timeout);
 
             /// From BaseQuery
             if (FromTable != null)
@@ -172,6 +175,29 @@ namespace MSSQLWrapper.Query {
                 }
 
                 return dt;
+            }
+        }
+
+        public IEnumerable<dynamic> ExecuteDynamic() {
+            using (var reader = ExecuteReader()) {
+                var schemaTable = reader.GetSchemaTable();
+
+                var colNames = new List<string>();
+
+                foreach (DataRow row in schemaTable.Rows) {
+                    colNames.Add(row["ColumnName"].ToString());
+                }
+
+                while (reader.Read()) {
+                    var data = new ExpandoObject() as IDictionary<string, Object>;
+
+                    foreach (string colname in colNames) {
+                        var val = reader[colname];
+                        data.Add(colname, Convert.IsDBNull(val) ? null : val);
+                    }
+
+                    yield return (ExpandoObject)data;
+                }
             }
         }
 

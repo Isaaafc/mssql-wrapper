@@ -41,6 +41,7 @@ namespace MSSQLWrapper.Query {
                 return String.Join($",{Environment.NewLine}", str);
             }
         }
+
         /// <summary>
         /// Columns and values to be updated
         /// </summary>
@@ -50,8 +51,8 @@ namespace MSSQLWrapper.Query {
         /// </summary>
         public string UpdateTable { get; set; }
 
-        public UpdateQuery(string fromTable = null, SqlConnection connection = null, int timeout = DefaultTimeout)
-            : base(fromTable, connection, timeout) {
+        public UpdateQuery(SqlConnection connection = null, int timeout = DefaultTimeout)
+            : base(connection, timeout) {
             
         }
 

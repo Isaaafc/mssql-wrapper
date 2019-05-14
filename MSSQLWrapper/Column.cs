@@ -32,6 +32,9 @@ namespace MSSQLWrapper.Query {
         }
 
         public Column(string name, string alias = null) {
+            if (String.IsNullOrEmpty(name))
+                throw new ArgumentException("Column name cannot be null");
+
             Name = name;
             Alias = alias;
         }

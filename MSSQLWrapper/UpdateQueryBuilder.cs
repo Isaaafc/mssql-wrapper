@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace MSSQLWrapper.Query {
     public class UpdateQueryBuilder : QueryBuilder<UpdateQuery, UpdateQueryBuilder> {
-        public UpdateQueryBuilder(string fromTable = null, SqlConnection connection = null, int timeout = DefaultTimeout)
+        public UpdateQueryBuilder(SqlConnection connection = null, int timeout = DefaultTimeout)
             : base() {
-            Query = new UpdateQuery(fromTable, connection, timeout);
+            Query = new UpdateQuery(connection, timeout);
         }
 
         public UpdateQueryBuilder Update(string table, UpdateQuery.UpdateSet updateColumns) {
