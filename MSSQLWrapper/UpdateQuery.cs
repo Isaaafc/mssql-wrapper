@@ -35,7 +35,7 @@ namespace MSSQLWrapper.Query {
                     Column left = ListSet[i].Item1;
                     object right = ListSet[i].Item2;
 
-                    str[i] = String.Format(" {0} = {1}", left.FullName, (right is Column) ? (right as Column).FullName : $"@updateParam{i}");
+                    str[i] = String.Format(" {0} = {1}", left.FullName, (right is Column) ? (right as Column).FullName : $"@updP{i}");
                 }
 
                 return String.Join($",{Environment.NewLine}", str);
@@ -113,7 +113,7 @@ namespace MSSQLWrapper.Query {
             for (int i = 0; i < UpdateColumns.ListSet.Count; i++) {
                 var tuple = UpdateColumns.ListSet[i];
 
-                cmd.Parameters.Add(new SqlParameter($"@updateParam{i}", tuple.Item2 ?? DBNull.Value));
+                cmd.Parameters.Add(new SqlParameter($"@updP{i}", tuple.Item2 ?? DBNull.Value));
             }
         }
 

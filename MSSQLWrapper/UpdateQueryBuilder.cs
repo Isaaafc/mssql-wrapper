@@ -19,9 +19,20 @@ namespace MSSQLWrapper.Query {
             return builder;
         }
 
-        public UpdateQueryBuilder Update(string table, params Tuple<Column, object>[] updateColumns) {
+        public UpdateQueryBuilder Update(string table, Dictionary<string, object> updateColumns) {
             Query.UpdateTable = table;
-            Query.UpdateColumns = new UpdateQuery.UpdateSet(updateColumns);
+            Query.UpdateColumns = new UpdateQuery.UpdateSet(
+                    updateColumns.Select(kv => Tuple.Create(new Column(kv.Key), kv.Value)).ToArray()
+                );
+
+            return builder;
+        }
+
+        public UpdateQueryBuilder Update(string table, Dictionary<Column, object> updateColumns) {
+            Query.UpdateTable = table;
+            Query.UpdateColumns = new UpdateQuery.UpdateSet(
+                    updateColumns.Select(kv => Tuple.Create(kv.Key, kv.Value)).ToArray()
+                );
 
             return builder;
         }

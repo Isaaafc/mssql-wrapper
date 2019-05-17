@@ -147,7 +147,7 @@ namespace MSSQLWrapper.Query {
         /// </summary>
         /// <returns></returns>
         public string ToTableOrQuery() {
-            return String.Format("{1}{0}", Environment.NewLine, IsTableOnly ? (FromTable == null ? FromQuery.Item1.FromTable : FromTable) : $"({ToRawQuery()})");
+            return String.Format("{0}", IsTableOnly ? (FromTable == null ? FromQuery.Item1.FromTable : FromTable) : $"({ToRawQuery()})");
         }
 
         protected override List<Condition> GetConditions() {

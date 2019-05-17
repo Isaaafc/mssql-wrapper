@@ -65,7 +65,7 @@ namespace MSSQLWrapper.Query {
             if (FromQuery == null) {
                 sb.AppendLine("VALUES (");
 
-                sb.AppendLine(String.Join($",{Environment.NewLine}", Enumerable.Range(0, InsertValues.Count).Select(r => $" @insertParam{r}")))
+                sb.AppendLine(String.Join($",{Environment.NewLine}", Enumerable.Range(0, InsertValues.Count).Select(r => $" @insP{r}")))
                   .AppendLine(")");
             } else {
                 sb.AppendLine(FromQuery.Item1.ToRawQuery());
@@ -81,7 +81,7 @@ namespace MSSQLWrapper.Query {
                 object val = InsertValues[i];
 
                 if (!(val is Column)) {
-                    cmd.Parameters.Add(new SqlParameter($"@insertParam{i}", val));
+                    cmd.Parameters.Add(new SqlParameter($"@insP{i}", val));
                 }
             }
         }

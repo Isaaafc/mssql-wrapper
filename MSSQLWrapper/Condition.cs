@@ -10,7 +10,6 @@ namespace MSSQLWrapper.Query {
     /// Represents a full condition clause such as ((a = b and b = c) or c = d ...)
     /// </summary>
     public class Condition {
-        private static int count = 0;
         public SqlOperator Operator { get; set; }
         public Column Column { get; set; }
 
@@ -25,7 +24,6 @@ namespace MSSQLWrapper.Query {
         public Condition() {
             ListConditions = new List<Tuple<Conditional, Condition>>();
             Operator = SqlOperator.Equals;
-            Name = $"@param{count++}";
         }
 
         public Condition(Column column, SqlOperator op, object value = null)
@@ -33,6 +31,17 @@ namespace MSSQLWrapper.Query {
             Column = column;
             Operator = op;
             Value = value;
+        }
+
+        /// <summary>
+        /// Constant condition
+        /// </summary>
+        /// <param name="val"></param>
+        public Condition(bool val)
+            : this() {
+            Column = new Column("1");
+            Operator = SqlOperator.Equals;
+            Value = new Column(val ? "1" : "0");
         }
 
         public Condition Append(Conditional cond, Condition otherCondition) {

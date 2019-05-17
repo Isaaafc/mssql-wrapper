@@ -95,6 +95,10 @@ namespace MSSQLWrapper.Query {
 
                 sb.AppendLine(FromTableOrQuery());
 
+                if (FromQuery != null) {
+                    sb.AppendFormat(" AS {0}", FromQuery.Item2);
+                }
+
                 sb.Append(JoinString);
 
                 if (WhereCondition != null) {

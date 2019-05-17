@@ -112,6 +112,18 @@ namespace MSSQLWrapper.Query {
             return builder;
         }
 
+        public TQueryBuilder WhereTrue() {
+            Query.WhereCondition = new Condition(true);
+
+            return builder;
+        }
+
+        public TQueryBuilder WhereFalse() {
+            Query.WhereCondition = new Condition(false);
+
+            return builder;
+        }
+
         public Column NewColumn(string name, string alias = null) {
             return Query.NewColumn(name, alias);
         }
