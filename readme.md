@@ -9,7 +9,7 @@ There are currently 4 types of queries implemented: Select, Insert, Update, Crea
 Builder classes are used to build queries.
 
 ```csharp
-SelectQueryBuilder select = new SelectQueryBuilder(sqlConnection);
+SelectQueryBuilder select = new SelectQueryBuilder(conn);
 select.From("[dbo].[Table1]");
 
 Console.WriteLine(select.Query.ToRawQuery());
@@ -68,9 +68,9 @@ int rowsAffected = insert.Query.ExecuteQuery(transaction);
 ### Create
 ```csharp
 /// Simple creation
-CreateQueryBuilder create = new CreateQueryBuilder(connection: sqlConnection);
+CreateQueryBuilder create = new CreateQueryBuilder(connection: conn);
 
-create.Create("#TestTable1");
+create.Create("[dbo].[Table1]");
 create.AddColumn("col1", DataType.Int);
 create.AddColumn("col2", DataType.NVarChar, 50);
 create.AddIdentity("Id", 1, 1);
@@ -79,7 +79,7 @@ create.AddIdentity("Id", 1, 1);
 Output
 
 ```sql
-CREATE TABLE #TestTable1 (
+CREATE TABLE [dbo].[Table1] (
  col1 int,
  col2 nvarchar(50),
  ID int IDENTITY(1, 1),
@@ -88,9 +88,9 @@ CREATE TABLE #TestTable1 (
 
 ```csharp
 /// Create a table from another table
-CreateQueryBuilder create2 = new CreateQueryBuilder(connection: sqlConnection);
-create2.Create("#TestTable2")
-       .From("#TestTable1");
+CreateQueryBuilder create2 = new CreateQueryBuilder(connection: conn);
+create2.Create("[dbo].[Table2]")
+       .From("[dbo].[Table1]");
 ```
 
 Output
@@ -99,16 +99,16 @@ Output
 SELECT
  *
 INTO
- #TestTable2
+ [dbo].[Table2]
 FROM
-#TestTable1
+[dbo].[Table1]
 ```
 
 ```csharp
 /// Create from select query
 SelectQueryBuilder select = new SelectQueryBuilder(connection: conn);
 
-select.From("#TestTable1", "t1");
+select.From("[dbo].[Table1]", "t1");
 
 select.Select(select.NewColumn("col1"),
             select.NewColumn("col2"),
@@ -116,23 +116,44 @@ select.Select(select.NewColumn("col1"),
             new Column("t2.[col1]", "col1_2"),
             new Column("t2.[col2]", "col2_2"),
             new Column("t2.[Id]", "Id_2"))
-      .Join("#TestTable2"
+      .Join("[dbo].[Table2]"
             "t2",
             SqlOperator.Equals,
             "Id");
 
 CreateQueryBuilder create = new CreateQueryBuilder(conn);
 
-create.Create("#TableFromQuery")
-        .From(select.Query, "t1");
+create.Create("[dbo].[TableFromQuery]")
+      .From(select.Query, "t1");
+```
+
+```sql
+SELECT
+ *
+INTO
+ [dbo].[TableFromQuery]
+FROM
+(SELECT
+ t1.[col1],
+ t1.[col2],
+ t1.[Id],
+ t2.[col1] AS col1_2,
+ t2.[col2] AS col2_2,
+ t2.[Id] AS Id_2
+FROM
+[dbo].[Table1] AS t1
+JOIN
+[dbo].[Table2] AS t2
+ ON (t2.[Id] = t1.[Id])
+) AS fr
 ```
 
 ### Insert
 ```csharp
-InsertQueryBuilder insert = new InsertQueryBuilder(connection: sqlConnection);
+InsertQueryBuilder insert = new InsertQueryBuilder(connection: conn);
 
 insert.Insert(/// Table name
-              "#TestTable1",
+              "[dbo].[Table1]",
               /// Column names
               "col1",
               "col2")
@@ -144,7 +165,7 @@ insert.Insert(/// Table name
 Output
 
 ```sql
-INSERT INTO #TestTable1 (
+INSERT INTO [dbo].[Table1] (
  [col1],
  [col2]
 )
@@ -164,7 +185,7 @@ var updateCols = new Dictionary<string, object>() {
     { "col2", "GGG" }
 };
 
-update.Update("#TestTable1", updateCols)
+update.Update("[dbo].[Table1]", updateCols)
       .Where(new Condition(new Column("ID"), SqlOperator.Lt, 3)
               .And(new Column("col1"), SqlOperator.Equals, 1));
 ```
@@ -172,7 +193,7 @@ update.Update("#TestTable1", updateCols)
 Output
 
 ```sql
-UPDATE #TestTable1
+UPDATE [dbo].[Table1]
 SET
  col1 = @updP0,
  col2 = @updP1
@@ -189,8 +210,8 @@ var updateCols = new Dictionary<Column, object>() {
 };
 
 update.Update("t2", updateCols)
-      .From("#TestTable1", "t1")
-      .Join("#TestTable2",
+      .From("[dbo].[Table1]", "t1")
+      .Join("[dbo].[Table2]",
           "t2",
           SqlOperator.Equals,
           "Id")
@@ -206,13 +227,57 @@ SET
  t2.[col1] = @updP0,
  t2.[col2] = @updP1
 FROM
-#TestTable1
- AS t1
+[dbo].[Table1] AS t1
 JOIN
-#TestTable2
- AS t2
+[dbo].[Table2] AS t2
  ON (t2.[ID] = t1.[ID])
 WHERE
  (t1.[ID] < @param0
  AND (t1.[col1] = @param1))
+```
+
+### Delete
+```csharp
+/// Simple deletion
+DeleteQueryBuilder delete = new DeleteQueryBuilder(connection: conn);
+
+delete.From(testTables[0])
+        .Where(delete.NewColumn("Id"), SqlOperator.Gte, 2);
+```
+
+Output
+
+```sql
+DELETE
+FROM
+[dbo].[Table1]
+WHERE
+ ([dbo].[Table1].[Id] >= @param0)
+```
+
+```csharp
+/// Delete from queries
+DeleteQueryBuilder delete = new DeleteQueryBuilder(connection: conn);
+
+delete.Delete("t2")
+      .From("[dbo].[Table1]", "t1")
+      .Join("[dbo].[Table2]",
+          "t2",
+          SqlOperator.Equals,
+          "Id"
+      )
+      .Where(delete.NewColumn("Id"), SqlOperator.Gte, 2);
+```
+
+Output
+
+```sql
+DELETE t2
+FROM
+[dbo].[Table1] AS t1
+JOIN
+[dbo].[Table2] AS t2
+ ON (t2.[Id] = t1.[Id])
+WHERE
+ (t1.[Id] >= @param0)
 ```

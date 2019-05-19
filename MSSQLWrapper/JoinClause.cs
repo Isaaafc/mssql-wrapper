@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MSSQLWrapper.Enums; 
 
 namespace MSSQLWrapper.Query {
-    public struct JoinClause {
+    public class JoinClause {
         public JoinType Type { get; set; }
         public SelectQuery Query { get; set; }
         public Condition Condition { get; set; }

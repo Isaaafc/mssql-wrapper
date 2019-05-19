@@ -37,6 +37,46 @@ namespace MSSQLWrapper.Query {
             return builder;
         }
 
+        public SelectQueryBuilder Union(SelectQuery otherQuery) {
+            Query.ListSetOp.Add(new SetOpClause(SetOpType.Union, otherQuery));
+
+            return builder;
+        }
+
+        public SelectQueryBuilder Union(string otherTable) {
+            return Union(new SelectQuery(otherTable));
+        }
+
+        public SelectQueryBuilder UnionAll(SelectQuery otherQuery) {
+            Query.ListSetOp.Add(new SetOpClause(SetOpType.UnionAll, otherQuery));
+
+            return builder;
+        }
+
+        public SelectQueryBuilder UnionAll(string otherTable) {
+            return UnionAll(new SelectQuery(otherTable));
+        }
+
+        public SelectQueryBuilder Intersect(SelectQuery otherQuery) {
+            Query.ListSetOp.Add(new SetOpClause(SetOpType.Intersect, otherQuery));
+
+            return builder;
+        }
+
+        public SelectQueryBuilder Intersect(string otherTable) {
+            return Intersect(new SelectQuery(otherTable));
+        }
+
+        public SelectQueryBuilder Except(SelectQuery otherQuery) {
+            Query.ListSetOp.Add(new SetOpClause(SetOpType.Except, otherQuery));
+
+            return builder;
+        }
+
+        public SelectQueryBuilder Except(string otherTable) {
+            return Except(new SelectQuery(otherTable));
+        }
+
         public SelectQueryBuilder GroupBy(params string[] columns) {
             Query.GroupByColumns.AddRange(columns.Select(r => Query.NewColumn(r)));
 

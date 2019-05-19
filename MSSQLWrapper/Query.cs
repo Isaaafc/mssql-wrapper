@@ -126,8 +126,12 @@ namespace MSSQLWrapper.Query {
         }
 
         protected void AssignParamNames(List<Condition> listConditions) {
-            for (int i = 0; i < listConditions.Count; i++) {
-                listConditions[i].Name = $"@param{i}";
+            int i = 0;
+
+            for (int j = 0; j < listConditions.Count; j++) {
+                if (!(listConditions[j].Value is Column)) {
+                    listConditions[j].Name = $"@param{i++}";
+                }
             }
         }
 
@@ -146,10 +150,14 @@ namespace MSSQLWrapper.Query {
 
             AssignParamNames(listConditions);
 
-            return ToRawQuery(listConditions);
+            return ToPlainQuery();
         }
 
-        protected virtual string ToRawQuery(List<Condition> listConditions) {
+        /// <summary>
+        /// ToRawQuery but without assigning param names
+        /// </summary>
+        /// <returns></returns>
+        public virtual string ToPlainQuery() {
             return FromTable;
         }
 

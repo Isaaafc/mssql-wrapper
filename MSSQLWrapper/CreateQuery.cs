@@ -8,6 +8,9 @@ using MSSQLWrapper.Enums;
 
 namespace MSSQLWrapper.Query {
     public class CreateQuery : BaseQuery {
+        /// <summary>
+        /// Name of table to create
+        /// </summary>
         public string Table { get; set; }
         public List<TableConstraint> ListConstraints { get; set; }
         /// <summary>
@@ -61,7 +64,7 @@ namespace MSSQLWrapper.Query {
             return sb.ToString();
         }
 
-        protected override string ToRawQuery(List<Condition> listConditions) {
+        public override string ToPlainQuery() {
             StringBuilder sb = new StringBuilder();
 
             if (FromTableOrQuery() == null) {
@@ -93,11 +96,7 @@ namespace MSSQLWrapper.Query {
 
                 sb.AppendLine("FROM");
 
-                sb.AppendLine(FromTableOrQuery());
-
-                if (FromQuery != null) {
-                    sb.AppendFormat(" AS {0}", FromQuery.Item2);
-                }
+                sb.AppendFormat("{0}{1}", FromTableOrQuery(), FromQuery == null ? "" : $" AS {FromQuery.Item2}");
 
                 sb.Append(JoinString);
 
@@ -116,7 +115,7 @@ namespace MSSQLWrapper.Query {
                 var listConditions = GetConditions();
                 AssignParamNames(listConditions);
 
-                cmd.CommandText = ToRawQuery(listConditions);
+                cmd.CommandText = ToPlainQuery();
                 AddCommandParams(cmd, listConditions);
 
                 return cmd.ExecuteNonQuery();
@@ -128,7 +127,7 @@ namespace MSSQLWrapper.Query {
                 var listConditions = GetConditions();
                 AssignParamNames(listConditions);
 
-                cmd.CommandText = ToRawQuery(listConditions);
+                cmd.CommandText = ToPlainQuery();
                 AddCommandParams(cmd, listConditions);
 
                 return cmd.ExecuteNonQuery();

@@ -152,4 +152,15 @@ namespace MSSQLWrapper.Enums {
         [EnumString("RIGHT OUTER")]
         RightOuter
     }
+
+    public enum SetOpType {
+        [EnumString("UNION")]
+        Union,
+        [EnumString("UNION ALL")]
+        UnionAll,
+        [EnumString("INTERSECT")]
+        Intersect,
+        [EnumString("EXCEPT")]
+        Except
+    }
 }

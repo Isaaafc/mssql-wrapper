@@ -12,6 +12,7 @@ namespace MSSQLWrapper.Query {
     public class SelectQuery : BaseQuery {
         public List<Column> SelectColumns { get; set; }
         public List<Column> GroupByColumns { get; set; }
+        public List<SetOpClause> ListSetOp { get; set; }
         public Condition HavingCondition { get; set; }
         public List<Tuple<Column, Order>> OrderByColumns { get; set; }
         public int TopN { get; set; }
@@ -36,12 +37,29 @@ namespace MSSQLWrapper.Query {
             }
         }
 
+        public string SetOpString {
+            get {
+                StringBuilder sb = new StringBuilder();
+
+                for (int i = 0; i < ListSetOp.Count; i++) {
+                    var setOpClause = ListSetOp[i];
+
+                    sb.AppendLine(setOpClause.Op.GetStringValue())
+                      .AppendLine(setOpClause.Query.ToPlainQuery());
+                }
+
+                return sb.ToString();
+            }
+        }
+
         public SelectQuery(string fromTable = null, SqlConnection connection = null, int timeout = DefaultTimeout)
             : base(connection, timeout) {
 
             SelectColumns = new List<Column>();
 
             GroupByColumns = new List<Column>();
+
+            ListSetOp = new List<SetOpClause>();
 
             OrderByColumns = new List<Tuple<Column, Order>>();
 
@@ -72,6 +90,7 @@ namespace MSSQLWrapper.Query {
             /// From SelectQuery
             query.SelectColumns = SelectColumns;
             query.GroupByColumns = GroupByColumns;
+            query.ListSetOp = ListSetOp;
             query.HavingCondition = HavingCondition;
             query.OrderByColumns = OrderByColumns;
             query.TopN = TopN;
@@ -80,7 +99,7 @@ namespace MSSQLWrapper.Query {
             return query;
         }
 
-        protected override string ToRawQuery(List<Condition> listConditions) {
+        public override string ToPlainQuery() {
             StringBuilder sb = new StringBuilder();
 
             sb.AppendLine("SELECT");
@@ -139,6 +158,8 @@ namespace MSSQLWrapper.Query {
                 sb.AppendLine(String.Join(",", OrderByColumns.Select(r => String.Format(" {0} {1}", String.IsNullOrEmpty(r.Item1.Alias) ? r.Item1.FullName : r.Item1.Alias, r.Item2.GetStringValue()))));
             }
 
+            sb.AppendLine(SetOpString);
+
             return sb.ToString();
         }
 
@@ -147,12 +168,16 @@ namespace MSSQLWrapper.Query {
         /// </summary>
         /// <returns></returns>
         public string ToTableOrQuery() {
-            return String.Format("{0}", IsTableOnly ? (FromTable == null ? FromQuery.Item1.FromTable : FromTable) : $"({ToRawQuery()})");
+            return String.Format("{0}", IsTableOnly ? (FromTable == null ? FromQuery.Item1.FromTable : FromTable) : $"({ToPlainQuery()})");
         }
 
         protected override List<Condition> GetConditions() {
             var listConditions = base.GetConditions();
 
+            /// All Conditions from set operations queries
+            listConditions.AddRange(ListSetOp.Select(r => r.Query.GetConditions()).SelectMany(r => r));
+
+            /// All Conditions from Having clause
             if (HavingCondition != null) {
                 listConditions.AddRange(HavingCondition.GetAllConditions());
             }
@@ -165,7 +190,7 @@ namespace MSSQLWrapper.Query {
                 var listConditions = GetConditions();
                 AssignParamNames(listConditions);
 
-                cmd.CommandText = ToRawQuery(listConditions);
+                cmd.CommandText = ToPlainQuery();
                 AddCommandParams(cmd, listConditions);
 
                 DataTable dt = new DataTable();
@@ -206,7 +231,7 @@ namespace MSSQLWrapper.Query {
                 var listConditions = GetConditions();
                 AssignParamNames(listConditions);
 
-                cmd.CommandText = ToRawQuery(listConditions);
+                cmd.CommandText = ToPlainQuery();
                 AddCommandParams(cmd, listConditions);
 
                 return cmd.ExecuteReader();

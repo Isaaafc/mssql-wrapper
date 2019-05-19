@@ -49,7 +49,7 @@ namespace MSSQLWrapper.Query {
             return query;
         }
 
-        protected override string ToRawQuery(List<Condition> listConditions) {
+        public override string ToPlainQuery() {
             StringBuilder sb = new StringBuilder();
 
             sb.AppendFormat("INSERT INTO {0}", Table);
@@ -91,7 +91,7 @@ namespace MSSQLWrapper.Query {
                 var listConditions = GetConditions();
                 AssignParamNames(listConditions);
 
-                cmd.CommandText = ToRawQuery(listConditions);
+                cmd.CommandText = ToPlainQuery();
                 AddCommandParams(cmd, listConditions);
 
                 return cmd.ExecuteNonQuery();
@@ -103,7 +103,7 @@ namespace MSSQLWrapper.Query {
                 var listConditions = GetConditions();
                 AssignParamNames(listConditions);
 
-                cmd.CommandText = ToRawQuery(listConditions);
+                cmd.CommandText = ToPlainQuery();
                 AddCommandParams(cmd, listConditions);
 
                 return cmd.ExecuteNonQuery();
