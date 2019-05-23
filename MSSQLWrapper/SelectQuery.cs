@@ -33,6 +33,7 @@ namespace MSSQLWrapper.Query {
                     && HavingCondition == null
                     && WhereCondition == null
                     && (FromQuery == null || FromQuery.Item1.IsTableOnly)
+                    && ListSetOp.Count == 0
                 );
             }
         }

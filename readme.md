@@ -1,6 +1,6 @@
 # MSSQLWrapper
 
-Build and execute queries directly in C# code with simple syntax.
+Build and execute queries directly in C# code with simple syntax. Get it via Nuget: https://www.nuget.org/packages/MSSQLWrapper
 
 ## Usage
 
@@ -242,7 +242,7 @@ WHERE
 DeleteQueryBuilder delete = new DeleteQueryBuilder(connection: conn);
 
 delete.From(testTables[0])
-        .Where(delete.NewColumn("Id"), SqlOperator.Gte, 2);
+      .Where(delete.NewColumn("Id"), SqlOperator.Gte, 2);
 ```
 
 Output
