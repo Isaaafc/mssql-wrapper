@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MSSQLWrapper {
+namespace MSSQLWrapper.Enums {
     public class EnumArgsAttribute : Attribute {
         public EnumArgsAttribute(bool hasArgs) {
             HasArgs = hasArgs;

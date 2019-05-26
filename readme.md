@@ -4,7 +4,7 @@ Build and execute queries directly in C# code with simple syntax. Get it via Nug
 
 ## Usage
 
-There are currently 4 types of queries implemented: Select, Insert, Update, Create. They all work in similar ways. 
+There are currently 5 types of queries implemented: Select, Insert, Update, Create, and Delete. They all work in similar ways. 
 
 Builder classes are used to build queries.
 
