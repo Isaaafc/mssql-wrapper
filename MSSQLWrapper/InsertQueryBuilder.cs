@@ -37,5 +37,30 @@ namespace MSSQLWrapper.Query {
 
             return this;
         }
+
+        public InsertQueryBuilder IfNotExists(params string[] columns) {
+            SelectQueryBuilder select = new SelectQueryBuilder();
+            select.From(Query.Table);
+
+            var insertCols = Query.InsertColumns
+                                  .Select(r => r.Name)
+                                  .ToList();
+
+            try {
+                Condition cond = new Condition(new Column(columns[0]), SqlOperator.Equals, Query.InsertValues[insertCols.IndexOf(columns[0])]);
+
+                foreach (string c in columns.Skip(1)) {
+                    cond.And(new Column(c), SqlOperator.Equals, Query.InsertValues[insertCols.IndexOf(c)]);
+                }
+
+                select.Where(cond);
+
+                Query.IfNotExistsQuery = select.Query;
+            } catch (IndexOutOfRangeException) {
+                throw new IndexOutOfRangeException("Insert columns and values must be defined before calling this IfNotExists() overload");
+            }
+
+            return this;
+        }
     }
 }
