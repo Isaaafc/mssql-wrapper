@@ -25,5 +25,17 @@ namespace MSSQLWrapper.Query {
 
             return this;
         }
+
+        public InsertQueryBuilder IfNotExists(SelectQuery selectQuery) {
+            Query.IfNotExistsQuery = selectQuery;
+
+            return this;
+        }
+
+        public InsertQueryBuilder ElseUpdate(UpdateQuery updateQuery) {
+            Query.ElseUpdateQuery = updateQuery;
+
+            return this;
+        }
     }
 }

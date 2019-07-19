@@ -107,7 +107,7 @@ namespace MSSQLWrapper.Query {
                 }
             }
 
-            return sb.ToString();
+            return sb.ToString().Trim();
         }
 
         public int ExecuteQuery() {

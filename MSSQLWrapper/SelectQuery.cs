@@ -161,7 +161,7 @@ namespace MSSQLWrapper.Query {
 
             sb.AppendLine(SetOpString);
 
-            return sb.ToString();
+            return sb.ToString().Trim();
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace MSSQLWrapper.Query {
             return String.Format("{0}", IsTableOnly ? (FromTable == null ? FromQuery.Item1.FromTable : FromTable) : $"({ToPlainQuery()})");
         }
 
-        protected override List<Condition> GetConditions() {
+        internal override List<Condition> GetConditions() {
             var listConditions = base.GetConditions();
 
             /// All Conditions from set operations queries

@@ -49,7 +49,7 @@ namespace MSSQLWrapper.Query {
                 sb.AppendLine(" " + WhereCondition.ToString());
             }
 
-            return sb.ToString();
+            return sb.ToString().Trim();
         }
 
         public int ExecuteQuery() {

@@ -104,7 +104,7 @@ namespace MSSQLWrapper.Query {
         /// Gets a flatted list of all conditions associated with this query
         /// </summary>
         /// <returns></returns>
-        protected virtual List<Condition> GetConditions() {
+        internal virtual List<Condition> GetConditions() {
             var listConditions = new List<Condition>();
 
             if (WhereCondition != null) {

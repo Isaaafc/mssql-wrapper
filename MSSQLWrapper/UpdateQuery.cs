@@ -104,12 +104,16 @@ namespace MSSQLWrapper.Query {
                 sb.AppendLine(" " + WhereCondition.ToString());
             }
 
-            return sb.ToString();
+            return sb.ToString().Trim();
         }
 
         protected override void AddCommandParams(SqlCommand cmd, List<Condition> listConditions) {
             base.AddCommandParams(cmd, listConditions);
 
+            AddUpdateCommandParams(cmd);
+        }
+
+        internal void AddUpdateCommandParams(SqlCommand cmd) {
             for (int i = 0; i < UpdateColumns.ListSet.Count; i++) {
                 var tuple = UpdateColumns.ListSet[i];
 
