@@ -26,6 +26,14 @@ namespace MSSQLWrapper.Query {
             return this;
         }
 
+        public InsertQueryBuilder InsertValues(string table, Dictionary<string, object> dict) {
+            Query.Table = table;
+            Query.InsertColumns = dict.Keys.Select(r => new Column(r)).ToList();
+            Query.InsertValues = dict.Values.ToList();
+
+            return this;
+        }
+
         public InsertQueryBuilder IfNotExists(SelectQuery selectQuery) {
             Query.IfNotExistsQuery = selectQuery;
 
@@ -39,7 +47,7 @@ namespace MSSQLWrapper.Query {
         }
 
         public InsertQueryBuilder IfNotExists(params string[] columns) {
-            SelectQueryBuilder select = new SelectQueryBuilder();
+            SelectQueryBuilder select = new SelectQueryBuilder(connection: Query.Connection);
             select.From(Query.Table);
 
             var insertCols = Query.InsertColumns

@@ -58,32 +58,23 @@ namespace MSSQLWrapper.Query {
             StringBuilder sb = new StringBuilder();
 
             if (IfNotExistsQuery != null) {
-                sb.AppendLine("IF NOT EXISTS (")
-                  .AppendLine(IfNotExistsQuery.ToPlainQuery())
-                  .AppendLine(")");
+                sb.AppendFormat("IF NOT EXISTS ({0})", IfNotExistsQuery.ToPlainQuery());
             }
 
-            sb.AppendFormat("INSERT INTO {0}", Table);
+            sb.AppendFormat(" INSERT INTO {0}", Table);
 
             if (InsertColumns.Count > 0) {
-                sb.AppendLine(" (")
-                  .AppendLine(String.Join($",{Environment.NewLine}", InsertColumns.Select(r => $" {r.Name}")))
-                  .AppendLine(")");
-            } else {
-                sb.AppendLine();
+                sb.AppendFormat(" ({0})", String.Join($", ", InsertColumns.Select(r => $"{r.Name}")));
             }
 
             if (FromQuery == null) {
-                sb.AppendLine("VALUES (")
-                  .AppendLine(String.Join($",{Environment.NewLine}", Enumerable.Range(0, InsertValues.Count).Select(r => $" @insP{r}")))
-                  .AppendLine(")");
+                sb.AppendFormat(" VALUES ({0})", String.Join($", ", Enumerable.Range(0, InsertValues.Count).Select(r => $"@insP{r}")));
             } else {
-                sb.AppendLine(FromQuery.Item1.ToPlainQuery());
+                sb.Append($" {FromQuery.Item1.ToPlainQuery()}");
             }
 
             if (ElseUpdateQuery != null) {
-                sb.AppendLine("ELSE")
-                  .AppendLine(ElseUpdateQuery.ToPlainQuery());
+                sb.AppendFormat(" ELSE {0}", ElseUpdateQuery.ToPlainQuery());
             }
 
             return sb.ToString().Trim();
@@ -100,7 +91,9 @@ namespace MSSQLWrapper.Query {
                 }
             }
 
-            ElseUpdateQuery.AddUpdateCommandParams(cmd);
+            if (ElseUpdateQuery != null) {
+                ElseUpdateQuery.AddUpdateCommandParams(cmd);
+            }
         }
 
         internal override List<Condition> GetConditions() {
@@ -119,19 +112,7 @@ namespace MSSQLWrapper.Query {
             return listConditions;
         }
 
-        public int ExecuteQuery() {
-            using (SqlCommand cmd = GetSqlCommand()) {
-                var listConditions = GetConditions();
-                AssignParamNames(listConditions);
-
-                cmd.CommandText = ToPlainQuery();
-                AddCommandParams(cmd, listConditions);
-
-                return cmd.ExecuteNonQuery();
-            }
-        }
-
-        public int ExecuteQuery(SqlTransaction trans) {
+        public int ExecuteQuery(SqlTransaction trans = null) {
             using (SqlCommand cmd = GetSqlCommand(trans)) {
                 var listConditions = GetConditions();
                 AssignParamNames(listConditions);

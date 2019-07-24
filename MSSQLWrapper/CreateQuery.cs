@@ -68,11 +68,10 @@ namespace MSSQLWrapper.Query {
             StringBuilder sb = new StringBuilder();
 
             if (FromTableOrQuery() == null) {
-                sb.AppendFormat("CREATE TABLE {0} (", Table)
-                  .AppendLine();
+                sb.AppendFormat("CREATE TABLE {0} (", Table);
 
                 foreach (var column in ListColumns) {
-                    sb.AppendFormat(" {0} {1}", column.Item1, String.Format(column.Item2.GetStringValue(), column.Item3));
+                    sb.AppendFormat("{0} {1}", column.Item1, String.Format(column.Item2.GetStringValue(), column.Item3));
 
                     Tuple<int, int> idParam;
 
@@ -80,30 +79,24 @@ namespace MSSQLWrapper.Query {
                         sb.AppendFormat(" IDENTITY({0}, {1})", idParam.Item1, idParam.Item2);
                     }
 
-                    sb.AppendLine(",");
+                    sb.Append(", ");
                 }
 
                 if (ListConstraints.Count > 0) {
-                    sb.Append(GetConstraintString());
+                    sb.Append($" {GetConstraintString()}");
                 }
 
-                sb.AppendLine(");");
+                sb.Append(");");
             } else {
-                sb.AppendLine("SELECT")
-                  .AppendLine(" *")
-                  .AppendLine("INTO")
-                  .AppendLine($" {Table}");
-
-                sb.AppendLine("FROM");
-
-                sb.AppendFormat("{0}{1}", FromTableOrQuery(), FromQuery == null ? "" : $" AS {FromQuery.Item2}");
+                sb.AppendFormat("SELECT * INTO {0} FROM {1}{2}",
+                    Table,
+                    FromTableOrQuery(),
+                    FromQuery == null ? "" : $" AS {FromQuery.Item2}");
 
                 sb.Append(JoinString);
 
                 if (WhereCondition != null) {
-                    sb.AppendLine("WHERE");
-
-                    sb.AppendLine($"  {WhereCondition.ToString()}");
+                    sb.AppendFormat(" WHERE {0}", WhereCondition.ToString());
                 }
             }
 

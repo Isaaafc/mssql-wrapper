@@ -8,6 +8,8 @@ There are currently 5 types of queries implemented: Select, Insert, Update, Crea
 
 Builder classes are used to build queries.
 
+*The outputs shown in this section are formatted for easier reading, while the actual outputs are not after version 1.0.0.1*
+
 ```csharp
 SelectQueryBuilder select = new SelectQueryBuilder(conn);
 select.From("[dbo].[Table1]");
@@ -18,10 +20,8 @@ Console.WriteLine(select.Query.ToRawQuery());
 Output
 
 ```sql
-SELECT
- *
-FROM
-[dbo].[Table1]
+SELECT *
+FROM [dbo].[Table1]
 ```
 
 The Column class represents a column from a table / query. The Condition class defines the relation between Columns / values. 
@@ -40,16 +40,10 @@ select.Join(/// Table name or SelectQuery class
 Output
 
 ```sql
-SELECT
- *
-FROM
-[dbo].[Table1]
-JOIN
-[dbo].[Table2]
- AS t2
- ON ([col1] = [dbo].[Table1].[col1])
-WHERE
- ([dbo].[Table1].[col2] IS NOT NULL)
+SELECT *
+FROM [dbo].[Table1]
+JOIN [dbo].[Table2] AS t2 ON ([col1] = [dbo].[Table1].[col1])
+WHERE ([dbo].[Table1].[col2] IS NOT NULL)
 ```
 
 Query execution can be done directly as well. 
@@ -80,9 +74,9 @@ Output
 
 ```sql
 CREATE TABLE [dbo].[Table1] (
- col1 int,
- col2 nvarchar(50),
- ID int IDENTITY(1, 1),
+      col1 int,
+      col2 nvarchar(50),
+      Id int IDENTITY(1, 1),
 );
 ```
 
@@ -96,12 +90,8 @@ create2.Create("[dbo].[Table2]")
 Output
 
 ```sql
-SELECT
- *
-INTO
- [dbo].[Table2]
-FROM
-[dbo].[Table1]
+SELECT * INTO [dbo].[Table2]
+FROM [dbo].[Table1]
 ```
 
 ```csharp
@@ -128,24 +118,16 @@ create.Create("[dbo].[TableFromQuery]")
 ```
 
 ```sql
-SELECT
- *
-INTO
- [dbo].[TableFromQuery]
+SELECT * INTO [dbo].[TableFromQuery]
 FROM
-(SELECT
- t1.[col1],
- t1.[col2],
- t1.[Id],
- t2.[col1] AS col1_2,
- t2.[col2] AS col2_2,
- t2.[Id] AS Id_2
-FROM
-[dbo].[Table1] AS t1
-JOIN
-[dbo].[Table2] AS t2
- ON (t2.[Id] = t1.[Id])
-) AS fr
+  (SELECT t1.[col1],
+          t1.[col2],
+          t1.[Id],
+          t2.[col1] AS col1_2,
+          t2.[col2] AS col2_2,
+          t2.[Id] AS Id_2
+   FROM [dbo].[Table1] AS t1
+   JOIN [dbo].[Table2] AS t2 ON (t2.[Id] = t1.[Id])) AS fr
 ```
 
 ### Insert
@@ -165,14 +147,53 @@ insert.Insert(/// Table name
 Output
 
 ```sql
-INSERT INTO [dbo].[Table1] (
- [col1],
- [col2]
-)
-VALUES (
- @insP0,
- @insP1
-)
+INSERT INTO [dbo].[Table1] ([col1], [col2])
+VALUES (@insP0, @insP1)
+```
+
+```csharp
+/// Insert from a dictionary
+/// Key: column name, Value: value to be inserted 
+var dict = new Dictionary<string, object>();
+dict["col1"] = 1;
+dict["col2"] = "AA";
+
+InsertQueryBuilder insert = new InsertQueryBuilder(connection: conn);
+
+insert.InsertValues("[dbo].[Table1]", dict);
+```
+
+```sql
+INSERT INTO [dbo].[Table1] (col1, col2)
+VALUES (@insP0, @insP1)
+```
+
+```csharp
+/// Insert if not exists else update
+InsertQueryBuilder insert = new InsertQueryBuilder(connection: conn);
+
+insert.Insert(/// Table name
+              "[dbo].[Table1]",
+              /// Column names
+              "col1",
+              "col2")
+      .Values(/// Values
+              1,
+              "AA")
+      .IfNotExists("col1", "col2")
+      .ElseUpdate(updateQuery);
+```
+
+```sql
+IF NOT EXISTS
+  (SELECT *
+   FROM [dbo].[Table1]
+   WHERE (col1 = @param0
+          AND col2 = @param1) )
+INSERT INTO [dbo].[Table1] (col1, col2)
+VALUES (@insP0, @insP1)
+ELSE 
+UPDATE ...
 ```
 
 ### Update
@@ -194,12 +215,10 @@ Output
 
 ```sql
 UPDATE [dbo].[Table1]
-SET
- col1 = @updP0,
- col2 = @updP1
-WHERE
- (ID < @param0
- AND (col1 = @param1))
+SET col1 = @updP0,
+    col2 = @updP1
+WHERE (ID < @param0
+       AND (col1 = @param1))
 ```
 
 ```csharp
@@ -223,17 +242,12 @@ Output
 
 ```sql
 UPDATE t2
-SET
- t2.[col1] = @updP0,
- t2.[col2] = @updP1
-FROM
-[dbo].[Table1] AS t1
-JOIN
-[dbo].[Table2] AS t2
- ON (t2.[ID] = t1.[ID])
-WHERE
- (t1.[ID] < @param0
- AND (t1.[col1] = @param1))
+SET t2.[col1] = @updP0,
+    t2.[col2] = @updP1
+FROM [dbo].[Table1] AS t1
+JOIN [dbo].[Table2] AS t2 ON (t2.[ID] = t1.[ID])
+WHERE (t1.[ID] < @param0
+       AND (t1.[col1] = @param1))
 ```
 
 ### Delete
@@ -249,10 +263,8 @@ Output
 
 ```sql
 DELETE
-FROM
-[dbo].[Table1]
-WHERE
- ([dbo].[Table1].[Id] >= @param0)
+FROM [dbo].[Table1]
+WHERE ([dbo].[Table1].[Id] >= @param0)
 ```
 
 ```csharp
@@ -273,11 +285,7 @@ Output
 
 ```sql
 DELETE t2
-FROM
-[dbo].[Table1] AS t1
-JOIN
-[dbo].[Table2] AS t2
- ON (t2.[Id] = t1.[Id])
-WHERE
- (t1.[Id] >= @param0)
+FROM [dbo].[Table1] AS t1
+JOIN [dbo].[Table2] AS t2 ON (t2.[Id] = t1.[Id])
+WHERE (t1.[Id] >= @param0)
 ```

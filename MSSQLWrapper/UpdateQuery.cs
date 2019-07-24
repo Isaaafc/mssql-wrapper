@@ -35,10 +35,10 @@ namespace MSSQLWrapper.Query {
                     Column left = ListSet[i].Item1;
                     object right = ListSet[i].Item2;
 
-                    str[i] = String.Format(" {0} = {1}", left.FullName, (right is Column) ? (right as Column).FullName : $"@updP{i}");
+                    str[i] = String.Format("{0} = {1}", left.FullName, (right is Column) ? (right as Column).FullName : $"@updP{i}");
                 }
 
-                return String.Join($",{Environment.NewLine}", str);
+                return String.Join($", ", str);
             }
         }
 
@@ -83,25 +83,16 @@ namespace MSSQLWrapper.Query {
         public override string ToPlainQuery() {
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendFormat("UPDATE {0}", UpdateTable)
-              .AppendLine();
-
-            sb.AppendLine("SET");
-
-            sb.AppendLine(UpdateColumns.ToString());
+            sb.AppendFormat("UPDATE {0} SET {1}", UpdateTable, UpdateColumns.ToString());
 
             if (FromTableOrQuery() != null) {
-                sb.AppendLine("FROM")
-                  .AppendFormat("{0}{1}", FromTableOrQuery(), FromQuery == null ? "" : $" AS {FromQuery.Item2}");
+                sb.AppendFormat(" FROM {0}{1}", FromTableOrQuery(), FromQuery == null ? "" : $" AS {FromQuery.Item2}");
             }
 
-            sb.AppendLine()
-              .Append(JoinString);
+            sb.Append(JoinString);
 
             if (WhereCondition != null) {
-                sb.AppendLine("WHERE");
-
-                sb.AppendLine(" " + WhereCondition.ToString());
+                sb.AppendFormat(" WHERE {0}", WhereCondition.ToString());
             }
 
             return sb.ToString().Trim();
