@@ -103,15 +103,14 @@ namespace MSSQLWrapper.Query {
         public override string ToPlainQuery() {
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine("SELECT");
+            sb.Append("SELECT");
 
             if (SelectDistinct) {
                 sb.Append(" DISTINCT");
             }
 
             if (TopN > 0) {
-                sb.AppendFormat(" TOP {0}", TopN)
-                  .AppendLine();
+                sb.AppendFormat(" TOP {0}", TopN);
             }
 
             if (SelectColumns.Count > 0) {
@@ -122,46 +121,36 @@ namespace MSSQLWrapper.Query {
                     
                     if (i < SelectColumns.Count - 1)
                         sb.Append(",");
-
-                    sb.AppendLine();
                 }
             } else {
-                sb.AppendLine(" *");
+                sb.Append(" *");
             }
 
-            sb.AppendLine("FROM")
-              .AppendFormat("{0}{1}", FromTableOrQuery(), FromQuery == null ? "" : $" AS {FromQuery.Item2}")
-              .AppendLine();
+            sb.AppendFormat(" FROM {0}{1}",
+                FromTableOrQuery(),
+                FromQuery == null ? "" : $" AS {FromQuery.Item2}");
 
-            sb.Append(JoinString);
+            sb.Append($" {JoinString}");
 
             if (WhereCondition != null) {
-                sb.AppendLine("WHERE");
-
-                sb.AppendLine(" " + WhereCondition.ToString());
+                sb.AppendFormat(" WHERE {0}", WhereCondition.ToString());
             }
 
             if (GroupByColumns.Count > 0) {
-                sb.AppendLine("GROUP BY");
-
-                sb.AppendLine(String.Join(",", GroupByColumns.Select(r => " " + r.FullName)));
+                sb.AppendFormat(" GROUP BY {0}", String.Join(",", GroupByColumns.Select(r => " " + r.FullName)));
             }
 
             if (HavingCondition != null) {
-                sb.AppendLine("HAVING");
-
-                sb.AppendLine(" " + HavingCondition.ToString());
+                sb.AppendFormat(" HAVING {0}", HavingCondition.ToString());
             }
 
             if (OrderByColumns.Count > 0) {
-                sb.AppendLine("ORDER BY");
-
-                sb.AppendLine(String.Join(",", OrderByColumns.Select(r => String.Format(" {0} {1}", String.IsNullOrEmpty(r.Item1.Alias) ? r.Item1.FullName : r.Item1.Alias, r.Item2.GetStringValue()))));
+                sb.AppendFormat(" ORDER BY {0}", String.Join(",", OrderByColumns.Select(r => String.Format(" {0} {1}", String.IsNullOrEmpty(r.Item1.Alias) ? r.Item1.FullName : r.Item1.Alias, r.Item2.GetStringValue()))));
             }
 
-            sb.AppendLine(SetOpString);
+            sb.Append($" {SetOpString}");
 
-            return sb.ToString();
+            return sb.ToString().Trim();
         }
 
         /// <summary>
@@ -172,7 +161,7 @@ namespace MSSQLWrapper.Query {
             return String.Format("{0}", IsTableOnly ? (FromTable == null ? FromQuery.Item1.FromTable : FromTable) : $"({ToPlainQuery()})");
         }
 
-        protected override List<Condition> GetConditions() {
+        internal override List<Condition> GetConditions() {
             var listConditions = base.GetConditions();
 
             /// All Conditions from set operations queries

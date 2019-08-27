@@ -64,13 +64,11 @@ namespace MSSQLWrapper.Query {
                 for (int i = 0; i < ListJoin.Count; i++) {
                     var joinClause = ListJoin[i];
 
-                    sb.AppendFormat("{0}JOIN", joinClause.Type == JoinType.Inner ? "" : $"{joinClause.Type.GetStringValue()} ")
-                      .AppendLine()
-                      .AppendFormat("{0}{1}", joinClause.Query.ToTableOrQuery(), String.IsNullOrEmpty(joinClause.Query.Alias) ? "" : $" AS {joinClause.Query.Alias}")
-                      .AppendLine();
-
-                    sb.AppendFormat(" ON {0}", joinClause.Condition.ToString())
-                      .AppendLine();
+                    sb.AppendFormat("{0}JOIN {1}{2} ON {3}",
+                        joinClause.Type == JoinType.Inner ? "" : $"{joinClause.Type.GetStringValue()} ",
+                        joinClause.Query.ToTableOrQuery(),
+                        String.IsNullOrEmpty(joinClause.Query.Alias) ? "" : $" AS {joinClause.Query.Alias}",
+                        joinClause.Condition.ToString());
                 }
 
                 return sb.ToString();
@@ -104,7 +102,7 @@ namespace MSSQLWrapper.Query {
         /// Gets a flatted list of all conditions associated with this query
         /// </summary>
         /// <returns></returns>
-        protected virtual List<Condition> GetConditions() {
+        internal virtual List<Condition> GetConditions() {
             var listConditions = new List<Condition>();
 
             if (WhereCondition != null) {
@@ -139,8 +137,8 @@ namespace MSSQLWrapper.Query {
             cmd.Parameters.Clear();
 
             foreach (Condition condition in listConditions) {
-                if (!String.IsNullOrEmpty(condition.Name) && condition.Value != null && !(condition.Value is Column)) {
-                    cmd.Parameters.Add(new SqlParameter(condition.Name, condition.Value));
+                if (!String.IsNullOrEmpty(condition.Name) && !(condition.Value is Column)) {
+                    cmd.Parameters.Add(new SqlParameter(condition.Name, condition.Value ?? DBNull.Value));
                 }
             }
         }
@@ -175,16 +173,8 @@ namespace MSSQLWrapper.Query {
             return FromTable == null ? FromQuery.Item2 : FromTable;
         }
 
-        protected SqlCommand GetSqlCommand() {
-            SqlCommand cmd = new SqlCommand("", Connection);
-
-            cmd.CommandTimeout = Timeout;
-
-            return cmd;
-        }
-
-        protected SqlCommand GetSqlCommand(SqlTransaction trans) {
-            SqlCommand cmd = new SqlCommand("", Connection, trans);
+        protected SqlCommand GetSqlCommand(SqlTransaction trans = null) {
+            SqlCommand cmd = trans == null ? new SqlCommand("", Connection) : new SqlCommand("", Connection, trans);
 
             cmd.CommandTimeout = Timeout;
 

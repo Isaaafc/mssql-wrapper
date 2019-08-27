@@ -35,21 +35,15 @@ namespace MSSQLWrapper.Query {
         public override string ToPlainQuery() {
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendFormat("DELETE {0}{1}", Table, Environment.NewLine);
-
-            sb.AppendLine("FROM")
-              .AppendFormat("{0}{1}", FromTableOrQuery(), FromQuery == null ? "" : $" AS {FromQuery.Item2}")
-              .AppendLine();
+            sb.AppendFormat("DELETE {0} FROM {1}{2}", Table, FromTableOrQuery(), FromQuery == null ? "" : $" AS {FromQuery.Item2}");
 
             sb.Append(JoinString);
 
             if (WhereCondition != null) {
-                sb.AppendLine("WHERE");
-
-                sb.AppendLine(" " + WhereCondition.ToString());
+                sb.AppendFormat(" WHERE {0}", WhereCondition.ToString());
             }
 
-            return sb.ToString();
+            return sb.ToString().Trim();
         }
 
         public int ExecuteQuery() {

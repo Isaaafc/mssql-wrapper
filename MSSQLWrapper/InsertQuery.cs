@@ -21,6 +21,9 @@ namespace MSSQLWrapper.Query {
             }
         }
 
+        public SelectQuery IfNotExistsQuery { get; set; }
+        public UpdateQuery ElseUpdateQuery { get; set; }
+
         public InsertQuery(SqlConnection connection = null, int timeout = DefaultTimeout)
             : base(connection, timeout) {
             InsertColumns = new List<Column>();
@@ -45,6 +48,8 @@ namespace MSSQLWrapper.Query {
             query.InsertValues = InsertValues;
             query.Table = Table;
             query.FromTable = FromTable;
+            query.IfNotExistsQuery = IfNotExistsQuery;
+            query.ElseUpdateQuery = ElseUpdateQuery;
 
             return query;
         }
@@ -52,26 +57,27 @@ namespace MSSQLWrapper.Query {
         public override string ToPlainQuery() {
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendFormat("INSERT INTO {0}", Table);
+            if (IfNotExistsQuery != null) {
+                sb.AppendFormat("IF NOT EXISTS ({0})", IfNotExistsQuery.ToPlainQuery());
+            }
+
+            sb.AppendFormat(" INSERT INTO {0}", Table);
 
             if (InsertColumns.Count > 0) {
-                sb.AppendLine(" (")
-                  .AppendLine(String.Join($",{Environment.NewLine}", InsertColumns.Select(r => $" [{r.Name}]")))
-                  .AppendLine(")");
-            } else {
-                sb.AppendLine();
+                sb.AppendFormat(" ({0})", String.Join($", ", InsertColumns.Select(r => $"{r.Name}")));
             }
 
             if (FromQuery == null) {
-                sb.AppendLine("VALUES (");
-
-                sb.AppendLine(String.Join($",{Environment.NewLine}", Enumerable.Range(0, InsertValues.Count).Select(r => $" @insP{r}")))
-                  .AppendLine(")");
+                sb.AppendFormat(" VALUES ({0})", String.Join($", ", Enumerable.Range(0, InsertValues.Count).Select(r => $"@insP{r}")));
             } else {
-                sb.AppendLine(FromQuery.Item1.ToRawQuery());
+                sb.Append($" {FromQuery.Item1.ToPlainQuery()}");
             }
 
-            return sb.ToString();
+            if (ElseUpdateQuery != null) {
+                sb.AppendFormat(" ELSE {0}", ElseUpdateQuery.ToPlainQuery());
+            }
+
+            return sb.ToString().Trim();
         }
 
         protected override void AddCommandParams(SqlCommand cmd, List<Condition> listConditions) {
@@ -81,24 +87,32 @@ namespace MSSQLWrapper.Query {
                 object val = InsertValues[i];
 
                 if (!(val is Column)) {
-                    cmd.Parameters.Add(new SqlParameter($"@insP{i}", val));
+                    cmd.Parameters.Add(new SqlParameter($"@insP{i}", val ?? DBNull.Value));
                 }
             }
-        }
 
-        public int ExecuteQuery() {
-            using (SqlCommand cmd = GetSqlCommand()) {
-                var listConditions = GetConditions();
-                AssignParamNames(listConditions);
-
-                cmd.CommandText = ToPlainQuery();
-                AddCommandParams(cmd, listConditions);
-
-                return cmd.ExecuteNonQuery();
+            if (ElseUpdateQuery != null) {
+                ElseUpdateQuery.AddUpdateCommandParams(cmd);
             }
         }
 
-        public int ExecuteQuery(SqlTransaction trans) {
+        internal override List<Condition> GetConditions() {
+            var listConditions = base.GetConditions();
+
+            /// If not exists conditions
+            if (IfNotExistsQuery != null) {
+                listConditions.AddRange(IfNotExistsQuery.GetConditions());
+            }
+
+            /// Else update conditions
+            if (ElseUpdateQuery != null) {
+                listConditions.AddRange(ElseUpdateQuery.GetConditions());
+            }
+
+            return listConditions;
+        }
+
+        public int ExecuteQuery(SqlTransaction trans = null) {
             using (SqlCommand cmd = GetSqlCommand(trans)) {
                 var listConditions = GetConditions();
                 AssignParamNames(listConditions);

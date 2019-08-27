@@ -9,7 +9,7 @@ There are currently 5 types of queries implemented: Select, Insert, Update, Crea
 Builder classes are used to build queries.
 
 ```csharp
-SelectQueryBuilder select = new SelectQueryBuilder(conn);
+SelectQueryBuilder select = new SelectQueryBuilder(connection: conn);
 select.From("[dbo].[Table1]");
 
 Console.WriteLine(select.Query.ToRawQuery());

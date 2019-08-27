@@ -75,14 +75,14 @@ namespace MSSQLWrapper.Query {
 
             sb.Append("(");
 
-            sb.AppendFormat("{0} {1}", Column.FullName, Operator.GetStringValue());
+            sb.AppendFormat("{0} {1}", Column.FullName, (ValueIsNull() ? SqlOperator.IsNull : Operator).GetStringValue());
 
-            if (Operator != SqlOperator.IsNotNull && Operator != SqlOperator.IsNull) {
+            if (Operator != SqlOperator.IsNotNull && Operator != SqlOperator.IsNull && !ValueIsNull()) {
                 sb.Append(" " + (Value is Column ? ((Column)Value).FullName : Name));
             }
 
             foreach (var tuple in ListConditions) {
-                sb.AppendFormat("{0} {1} {2}", Environment.NewLine, tuple.Item1.GetStringValue(), tuple.Item2.ToString());
+                sb.AppendFormat(" {0} {1}", tuple.Item1.GetStringValue(), tuple.Item2.ToString());
             }
 
             sb.Append(")");
@@ -126,6 +126,10 @@ namespace MSSQLWrapper.Query {
 
             return list.Where(r => r != null)
                        .ToList();
+        }
+
+        public bool ValueIsNull() {
+            return (Value == null || Value == DBNull.Value) && Operator != SqlOperator.IsNotNull;
         }
     }
 }
